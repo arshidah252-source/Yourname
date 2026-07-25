@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Social App</title>
-    <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
@@ -224,7 +223,6 @@
     </style>
 </head>
 <body>
-    <!-- Auth -->
     <div id="auth" class="page active">
         <div class="auth-box">
             <h2 style="text-align:center; margin-bottom:20px;">Welcome</h2>
@@ -235,8 +233,6 @@
             <div class="switch" id="switchAuth">Don't have an account? Register</div>
         </div>
     </div>
-
-    <!-- Home -->
     <div id="home" class="page">
         <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 16px 0;">
             <h2 style="font-size:20px;">Social</h2>
@@ -247,354 +243,78 @@
         <div class="tabs"><div class="tab active" data-tab="forYou">For You</div><div class="tab" data-tab="following">Following</div></div>
         <div class="masonry" id="postsContainer"></div>
     </div>
-
-    <!-- Story Viewer -->
     <div id="storyViewer"><button class="close" onclick="closeStory()">✕</button><div class="story-progress"><div class="progress-fill" id="storyProgressFill"></div></div><img class="story-content" id="storyImage" style="display:none;"><video class="story-content" id="storyVideo" style="display:none;" controls autoplay></video><div class="story-info" id="storyInfo"></div></div>
-
-    <!-- Detail Page -->
     <div id="detailPage" class="page"><button class="back-btn" onclick="showPage('home')">← Back</button><div id="detailContainer"></div></div>
-
-    <!-- Video Page -->
     <div id="video" class="page" id="videoPage"><div id="videoContainer"></div></div>
-
-    <!-- Explore Page -->
-    <div id="explore" class="page">
-        <h2 style="padding: 16px;">🔍 Explore</h2>
-        <div class="explore-grid" id="exploreGrid"></div>
-    </div>
-
-    <!-- Notifications -->
-    <div id="notifications" class="page">
-        <h2 style="padding: 16px;">🔔 Notifications</h2>
-        <div id="notifList"></div>
-    </div>
-
-    <!-- Add Post -->
-    <div id="addPost" class="page">
-        <h2>Create Post</h2>
-        <input type="text" id="postUsername" placeholder="Your username" style="padding:12px; border-radius:8px; border:none; background:#222; color:#fff; margin-bottom:12px;">
-        <textarea id="postText" placeholder="What's on your mind? (Optional)"></textarea>
-        <div class="media-type"><label><input type="radio" name="mediaType" value="image" checked> Image</label><label><input type="radio" name="mediaType" value="video"> Video</label></div>
-        <button class="file-btn" onclick="document.getElementById('postMedia').click();">📁 Select from Gallery</button>
-        <input type="file" id="postMedia" accept="image/*,video/*" style="display:none;">
-        <button id="submitPost">Post</button>
-    </div>
-
-    <!-- Chat -->
-    <div id="chat" class="page">
-        <h2 style="padding:0 16px; margin-top:16px;">💬 Chat</h2>
-        <div id="chatUserList"></div>
-        <div id="chatConversation">
-            <button class="back-btn" onclick="closeChat()">← Back</button>
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Type a message...">
-                <button class="file-btn-chat" onclick="document.getElementById('chatMediaInput').click();">📎</button>
-                <input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;" onchange="sendChatMedia(event)">
-                <button id="sendChat">Send</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Profile -->
-    <div id="profile" class="page">
-        <div class="profile-header">
-            <div class="profile-avatar" id="profileAvatar">👤</div>
-            <h2 id="profileName">User</h2>
-            <div class="profile-stats">
-                <div onclick="openFollowModal('followers')"><div class="num" id="followersCount">0</div><div class="label">Followers</div></div>
-                <div onclick="openFollowModal('following')"><div class="num" id="followingCount">0</div><div class="label">Following</div></div>
-                <div><div class="num" id="postCount">0</div><div class="label">Posts</div></div>
-            </div>
-            <input type="file" id="avatarInput" accept="image/*" style="display:none;">
-            <button id="logoutBtn" style="background:#333; color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; margin-top:8px;">Logout</button>
-        </div>
-        <div class="profile-tabs">
-            <span class="profile-tab active" data-tab="myposts" onclick="switchProfileTab('myposts')">My Posts</span>
-            <span class="profile-tab" data-tab="liked" onclick="switchProfileTab('liked')">❤️ Liked</span>
-            <span class="profile-tab" data-tab="saved" onclick="switchProfileTab('saved')">🔖 Saved</span>
-            <span class="profile-tab" data-tab="reposted" onclick="switchProfileTab('reposted')">🔁 Reposted</span>
-        </div>
-        <div class="masonry" id="userPosts"></div>
-    </div>
-
-    <!-- Settings -->
-    <div id="settings" class="page">
-        <div style="padding: 16px;">
-            <h2 style="margin-bottom: 16px;">⚙️ Settings</h2>
-            <div class="settings-card">
-                <h4>Account</h4>
-                <div class="settings-item" onclick="toggleAccountEdit()">
-                    <span class="label">Edit Profile</span>
-                    <span class="arrow">›</span>
-                </div>
-                <div id="accountEdit" style="display:none; margin-top:12px;">
-                    <input type="text" id="editUsername" class="settings-input" placeholder="New username">
-                    <input type="password" id="editPassword" class="settings-input" placeholder="New password">
-                    <button class="settings-btn" onclick="saveAccountSettings()">Save Changes</button>
-                    <button class="settings-btn danger" onclick="deleteAccount()">Delete Account</button>
-                </div>
-            </div>
-            <div class="settings-card">
-                <h4>Theme</h4>
-                <div class="theme-toggle">
-                    <button id="themeDark" class="active" onclick="setTheme('dark')">🌙 Dark</button>
-                    <button id="themeLight" onclick="setTheme('light')">☀️ Light</button>
-                </div>
-            </div>
-            <div class="settings-card">
-                <h4>🔍 Search</h4>
-                <input type="text" id="searchQuery" class="settings-input" placeholder="Search posts, users, #hashtags..." oninput="performSearch()">
-                <div id="searchResults" class="search-results" style="display:none;"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Follow Modal -->
-    <div class="follow-modal" id="followModal">
-        <div class="follow-modal-content">
-            <h3 id="followModalTitle">Followers</h3>
-            <div id="followList"></div>
-            <button class="close-modal" onclick="closeFollowModal()">Close</button>
-        </div>
-    </div>
-
-    <!-- Profile Viewer -->
-    <div id="profileViewer" class="page">
-        <button class="back-btn" onclick="closeProfileViewer()">← Back</button>
-        <div class="profile-header">
-            <div class="profile-avatar" id="viewerAvatar">👤</div>
-            <h2 id="viewerName">User</h2>
-            <div class="profile-stats">
-                <div onclick="openFollowModal('followers')"><div class="num" id="viewerFollowersCount">0</div><div class="label">Followers</div></div>
-                <div onclick="openFollowModal('following')"><div class="num" id="viewerFollowingCount">0</div><div class="label">Following</div></div>
-            </div>
-            <button class="follow-btn" id="viewerFollowBtn" onclick="toggleFollow()">Follow</button>
-        </div>
-        <h3 style="padding:0 16px;">Posts</h3>
-        <div class="masonry" id="viewerPosts"></div>
-    </div>
-
-    <!-- Share Modal -->
-    <div class="share-modal" id="shareModal">
-        <div class="share-modal-content">
-            <h3>Share with</h3>
-            <div id="shareUserList"></div>
-            <button class="close-modal" onclick="closeShareModal()">Close</button>
-        </div>
-    </div>
-
-    <!-- User Search Overlay -->
-    <div id="userSearchOverlay">
-        <div class="search-header">
-            <input type="text" id="userSearchInput" placeholder="Search for users..." oninput="performUserSearch()">
-            <button class="close-search" onclick="closeUserSearch()">✕</button>
-        </div>
-        <div id="userSearchResults"></div>
-    </div>
-
-    <!-- Bottom Nav -->
-    <div class="bottom-nav" id="mainNav" style="display:none;">
-        <div class="nav-item active" data-page="home"><span class="icon">🏠</span><span>Home</span></div>
-        <div class="nav-item" data-page="explore"><span class="icon">🔍</span><span>Explore</span></div>
-        <div class="nav-item add-btn" data-page="addPost"><span class="icon">➕</span></div>
-        <div class="nav-item" data-page="video"><span class="icon">🎬</span><span>Video</span></div>
-        <div class="nav-item" data-page="chat"><span class="icon">💬</span><span>Chat</span></div>
-        <div class="nav-item" data-page="notifications"><span class="icon">🔔</span><span>Notif</span></div>
-        <div class="nav-item" data-page="profile"><span class="icon">👤</span><span>Profile</span></div>
-        <div class="nav-item" data-page="settings"><span class="icon">⚙️</span><span>Settings</span></div>
-    </div>
-
-    <!-- Comments Overlay -->
-    <div class="comments-overlay" id="commentsOverlay">
-        <div class="handle"></div>
-        <button class="close-btn" onclick="closeCommentsOverlay()">✕</button>
-        <div id="commentsOverlayContent"></div>
-        <div class="comment-input-area">
-            <input type="text" id="commentOverlayInput" placeholder="Add a comment...">
-            <button id="commentOverlaySend">Post</button>
-        </div>
-    </div>
-
+    <div id="explore" class="page"><h2 style="padding: 16px;">🔍 Explore</h2><div class="explore-grid" id="exploreGrid"></div></div>
+    <div id="notifications" class="page"><h2 style="padding: 16px;">🔔 Notifications</h2><div id="notifList"></div></div>
+    <div id="addPost" class="page"><h2>Create Post</h2><input type="text" id="postUsername" placeholder="Your username" style="padding:12px; border-radius:8px; border:none; background:#222; color:#fff; margin-bottom:12px;"><textarea id="postText" placeholder="What's on your mind? (Optional)"></textarea><div class="media-type"><label><input type="radio" name="mediaType" value="image" checked> Image</label><label><input type="radio" name="mediaType" value="video"> Video</label></div><button class="file-btn" onclick="document.getElementById('postMedia').click();">📁 Select from Gallery</button><input type="file" id="postMedia" accept="image/*,video/*" style="display:none;"><button id="submitPost">Post</button></div>
+    <div id="chat" class="page"><h2 style="padding:0 16px; margin-top:16px;">💬 Chat</h2><div id="chatUserList"></div><div id="chatConversation"><button class="back-btn" onclick="closeChat()">← Back</button><div class="chat-messages" id="chatMessages"></div><div class="chat-input"><input type="text" id="chatInput" placeholder="Type a message..."><button class="file-btn-chat" onclick="document.getElementById('chatMediaInput').click();">📎</button><input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;" onchange="sendChatMedia(event)"><button id="sendChat">Send</button></div></div></div>
+    <div id="profile" class="page"><div class="profile-header"><div class="profile-avatar" id="profileAvatar">👤</div><h2 id="profileName">User</h2><div class="profile-stats"><div onclick="openFollowModal('followers')"><div class="num" id="followersCount">0</div><div class="label">Followers</div></div><div onclick="openFollowModal('following')"><div class="num" id="followingCount">0</div><div class="label">Following</div></div><div><div class="num" id="postCount">0</div><div class="label">Posts</div></div></div><input type="file" id="avatarInput" accept="image/*" style="display:none;"><button id="logoutBtn" style="background:#333; color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; margin-top:8px;">Logout</button></div><div class="profile-tabs"><span class="profile-tab active" data-tab="myposts" onclick="switchProfileTab('myposts')">My Posts</span><span class="profile-tab" data-tab="liked" onclick="switchProfileTab('liked')">❤️ Liked</span><span class="profile-tab" data-tab="saved" onclick="switchProfileTab('saved')">🔖 Saved</span><span class="profile-tab" data-tab="reposted" onclick="switchProfileTab('reposted')">🔁 Reposted</span></div><div class="masonry" id="userPosts"></div></div>
+    <div id="settings" class="page"><div style="padding: 16px;"><h2 style="margin-bottom: 16px;">⚙️ Settings</h2><div class="settings-card"><h4>Account</h4><div class="settings-item" onclick="toggleAccountEdit()"><span class="label">Edit Profile</span><span class="arrow">›</span></div><div id="accountEdit" style="display:none; margin-top:12px;"><input type="text" id="editUsername" class="settings-input" placeholder="New username"><input type="password" id="editPassword" class="settings-input" placeholder="New password"><button class="settings-btn" onclick="saveAccountSettings()">Save Changes</button><button class="settings-btn danger" onclick="deleteAccount()">Delete Account</button></div></div><div class="settings-card"><h4>Theme</h4><div class="theme-toggle"><button id="themeDark" class="active" onclick="setTheme('dark')">🌙 Dark</button><button id="themeLight" onclick="setTheme('light')">☀️ Light</button></div></div><div class="settings-card"><h4>🔍 Search</h4><input type="text" id="searchQuery" class="settings-input" placeholder="Search posts, users, #hashtags..." oninput="performSearch()"><div id="searchResults" class="search-results" style="display:none;"></div></div></div></div>
+    <div class="follow-modal" id="followModal"><div class="follow-modal-content"><h3 id="followModalTitle">Followers</h3><div id="followList"></div><button class="close-modal" onclick="closeFollowModal()">Close</button></div></div>
+    <div id="profileViewer" class="page"><button class="back-btn" onclick="closeProfileViewer()">← Back</button><div class="profile-header"><div class="profile-avatar" id="viewerAvatar">👤</div><h2 id="viewerName">User</h2><div class="profile-stats"><div onclick="openFollowModal('followers')"><div class="num" id="viewerFollowersCount">0</div><div class="label">Followers</div></div><div onclick="openFollowModal('following')"><div class="num" id="viewerFollowingCount">0</div><div class="label">Following</div></div></div><button class="follow-btn" id="viewerFollowBtn" onclick="toggleFollow()">Follow</button></div><h3 style="padding:0 16px;">Posts</h3><div class="masonry" id="viewerPosts"></div></div>
+    <div class="share-modal" id="shareModal"><div class="share-modal-content"><h3>Share with</h3><div id="shareUserList"></div><button class="close-modal" onclick="closeShareModal()">Close</button></div></div>
+    <div id="userSearchOverlay"><div class="search-header"><input type="text" id="userSearchInput" placeholder="Search for users..." oninput="performUserSearch()"><button class="close-search" onclick="closeUserSearch()">✕</button></div><div id="userSearchResults"></div></div>
+    <div class="bottom-nav" id="mainNav" style="display:none;"><div class="nav-item active" data-page="home"><span class="icon">🏠</span><span>Home</span></div><div class="nav-item" data-page="explore"><span class="icon">🔍</span><span>Explore</span></div><div class="nav-item add-btn" data-page="addPost"><span class="icon">➕</span></div><div class="nav-item" data-page="video"><span class="icon">🎬</span><span>Video</span></div><div class="nav-item" data-page="chat"><span class="icon">💬</span><span>Chat</span></div><div class="nav-item" data-page="notifications"><span class="icon">🔔</span><span>Notif</span></div><div class="nav-item" data-page="profile"><span class="icon">👤</span><span>Profile</span></div><div class="nav-item" data-page="settings"><span class="icon">⚙️</span><span>Settings</span></div></div>
+    <div class="comments-overlay" id="commentsOverlay"><div class="handle"></div><button class="close-btn" onclick="closeCommentsOverlay()">✕</button><div id="commentsOverlayContent"></div><div class="comment-input-area"><input type="text" id="commentOverlayInput" placeholder="Add a comment..."><button id="commentOverlaySend">Post</button></div></div>
     <script>
-        // ============= SUPABASE CONFIG =============
         const SUPABASE_URL = 'https://ynsrwogjstrgfbqyvvhq.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_aeE5Kjw9B5wlpQ0rTLrKrw_wDWJ1yOS';
-        
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-        
-        // ============= STATE =============
         let currentUser = localStorage.getItem('currentUser') || null;
         let posts = [];
         let users = {};
         let currentTab = 'forYou';
         let viewingUser = null;
         let profileTab = 'myposts';
-        let selectedChatUser = null;
         let isLogin = true;
-        let storyInterval = null;
         let activeCommentPostId = null;
-        let sharePostId = null;
 
-        // ============= DOM REFS =============
-        const authPage = document.getElementById('auth');
-        const nav = document.getElementById('mainNav');
-        const postsContainer = document.getElementById('postsContainer');
-        const searchInput = document.getElementById('searchInput');
-        const tabs = document.querySelectorAll('.tab');
-        const videoContainer = document.getElementById('videoContainer');
-        const detailContainer = document.getElementById('detailContainer');
-        const storiesContainer = document.getElementById('storiesContainer');
-        const storyViewer = document.getElementById('storyViewer');
-        const storyImage = document.getElementById('storyImage');
-        const storyVideo = document.getElementById('storyVideo');
-        const storyInfo = document.getElementById('storyInfo');
-        const storyProgressFill = document.getElementById('storyProgressFill');
-        const commentsOverlay = document.getElementById('commentsOverlay');
-        const commentsOverlayContent = document.getElementById('commentsOverlayContent');
-        const commentOverlayInput = document.getElementById('commentOverlayInput');
-        const commentOverlaySend = document.getElementById('commentOverlaySend');
-        const profileViewer = document.getElementById('profileViewer');
-        const viewerAvatar = document.getElementById('viewerAvatar');
-        const viewerName = document.getElementById('viewerName');
-        const viewerPosts = document.getElementById('viewerPosts');
-        const viewerFollowBtn = document.getElementById('viewerFollowBtn');
-        const viewerFollowersCount = document.getElementById('viewerFollowersCount');
-        const viewerFollowingCount = document.getElementById('viewerFollowingCount');
-        const userPostsDiv = document.getElementById('userPosts');
-        const postCount = document.getElementById('postCount');
-        const followersCount = document.getElementById('followersCount');
-        const followingCount = document.getElementById('followingCount');
-        const followModal = document.getElementById('followModal');
-        const followList = document.getElementById('followList');
-        const followModalTitle = document.getElementById('followModalTitle');
-        const shareModal = document.getElementById('shareModal');
-        const shareUserList = document.getElementById('shareUserList');
-        const chatUserList = document.getElementById('chatUserList');
-        const chatConversation = document.getElementById('chatConversation');
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
-        const sendChatBtn = document.getElementById('sendChat');
-        const chatMediaInput = document.getElementById('chatMediaInput');
-        const settingsSearch = document.getElementById('searchQuery');
-        const searchResults = document.getElementById('searchResults');
-        const exploreGrid = document.getElementById('exploreGrid');
-        const notifList = document.getElementById('notifList');
-        const userSearchOverlay = document.getElementById('userSearchOverlay');
-        const userSearchInput = document.getElementById('userSearchInput');
-        const userSearchResults = document.getElementById('userSearchResults');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const switchAuth = document.getElementById('switchAuth');
-        const submitPost = document.getElementById('submitPost');
-        const postText = document.getElementById('postText');
-        const postMedia = document.getElementById('postMedia');
-        const postUsername = document.getElementById('postUsername');
-        const profileAvatar = document.getElementById('profileAvatar');
-        const profileName = document.getElementById('profileName');
-        const avatarInput = document.getElementById('avatarInput');
-        const logoutBtn = document.getElementById('logoutBtn');
-
-        // ============= FUNCTIONS =============
-        
-        // Load posts from Supabase
         async function loadPosts() {
             try {
-                const { data, error } = await supabase
-                    .from('posts')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
+                const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
                 posts = data || [];
                 renderPosts();
                 renderExplore();
                 renderUserPosts();
                 if (viewingUser) viewProfile(viewingUser);
-            } catch (e) {
-                console.error('Error loading posts:', e);
-            }
+            } catch (e) { console.error('Error loading posts:', e); }
         }
 
-        // Load users from Supabase
         async function loadUsers() {
             try {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*');
-                
+                const { data, error } = await supabase.from('users').select('*');
                 if (error) throw error;
                 users = {};
                 data.forEach(u => { users[u.username] = u; });
                 updateUI();
-            } catch (e) {
-                console.error('Error loading users:', e);
-            }
+            } catch (e) { console.error('Error loading users:', e); }
         }
 
-        // Register
         registerBtn.addEventListener('click', async () => {
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
-            
-            if (!username || !password) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            if (username.length < 3) {
-                alert('Username must be at least 3 characters');
-                return;
-            }
-            
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters');
-                return;
-            }
-            
+            if (!username || !password) { alert('Please fill all fields'); return; }
+            if (username.length < 3) { alert('Username must be at least 3 characters'); return; }
+            if (password.length < 6) { alert('Password must be at least 6 characters'); return; }
             try {
                 registerBtn.textContent = '⏳ Registering...';
                 registerBtn.disabled = true;
-                
-                // Check if user exists
-                const { data: existing, error: checkError } = await supabase
-                    .from('users')
-                    .select('username')
-                    .eq('username', username);
-                
-                if (existing && existing.length > 0) {
-                    alert('Username already taken!');
-                    return;
-                }
-                
-                // Create user
-                const { error: insertError } = await supabase
-                    .from('users')
-                    .insert({
-                        username: username,
-                        password: password,
-                        avatar: null,
-                        followers: [],
-                        following: []
-                    });
-                
-                if (insertError) throw insertError;
-                
+                const { data: existing } = await supabase.from('users').select('username').eq('username', username);
+                if (existing && existing.length > 0) { alert('Username already taken!'); return; }
+                const { error } = await supabase.from('users').insert({ username, password, avatar: null, followers: [], following: [] });
+                if (error) throw error;
                 currentUser = username;
                 localStorage.setItem('currentUser', currentUser);
-                
                 await loadUsers();
                 await loadPosts();
                 updateUI();
-                
                 alert('✅ Registration successful! Welcome ' + username);
                 usernameInput.value = '';
                 passwordInput.value = '';
-                
             } catch (e) {
-                console.error('Registration error:', e);
                 alert('❌ Registration failed: ' + e.message);
             } finally {
                 registerBtn.textContent = 'Register';
@@ -602,45 +322,24 @@
             }
         });
 
-        // Login
         loginBtn.addEventListener('click', async () => {
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
-            
-            if (!username || !password) {
-                alert('Please fill all fields');
-                return;
-            }
-            
+            if (!username || !password) { alert('Please fill all fields'); return; }
             try {
                 loginBtn.textContent = '⏳ Logging in...';
                 loginBtn.disabled = true;
-                
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', username)
-                    .eq('password', password);
-                
+                const { data, error } = await supabase.from('users').select('*').eq('username', username).eq('password', password);
                 if (error) throw error;
-                
-                if (!data || data.length === 0) {
-                    alert('Invalid username or password');
-                    return;
-                }
-                
+                if (!data || data.length === 0) { alert('Invalid username or password'); return; }
                 currentUser = username;
                 localStorage.setItem('currentUser', currentUser);
-                
                 await loadUsers();
                 await loadPosts();
                 updateUI();
-                
                 usernameInput.value = '';
                 passwordInput.value = '';
-                
             } catch (e) {
-                console.error('Login error:', e);
                 alert('❌ Login failed: ' + e.message);
             } finally {
                 loginBtn.textContent = 'Login';
@@ -648,64 +347,40 @@
             }
         });
 
-        // Logout
         logoutBtn.addEventListener('click', () => {
             currentUser = null;
             localStorage.removeItem('currentUser');
             updateUI();
         });
 
-        // Create Post
         submitPost.addEventListener('click', async () => {
             const text = postText.value.trim();
             const username = postUsername.value.trim() || currentUser;
-            
-            if (!text && !postMedia.files[0]) {
-                alert('Write something or add media');
-                return;
-            }
-            
+            if (!text && !postMedia.files[0]) { alert('Write something or add media'); return; }
             try {
                 submitPost.textContent = '⏳ Posting...';
                 submitPost.disabled = true;
-                
                 let mediaUrl = null;
                 let mediaType = 'text';
-                
                 const file = postMedia.files[0];
                 if (file) {
                     mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-                    // Convert to base64 for Supabase (or you can use Supabase Storage)
                     const reader = new FileReader();
                     mediaUrl = await new Promise((resolve) => {
                         reader.onload = () => resolve(reader.result);
                         reader.readAsDataURL(file);
                     });
                 }
-                
-                const { error } = await supabase
-                    .from('posts')
-                    .insert({
-                        username: username,
-                        text: text || (file ? (mediaType === 'image' ? '📷' : '🎬') : ''),
-                        media: mediaUrl,
-                        mediaType: mediaType,
-                        likes: [],
-                        comments: [],
-                        reposts: 0,
-                        saved: [],
-                        views: 0
-                    });
-                
+                const { error } = await supabase.from('posts').insert({
+                    username, text: text || (file ? (mediaType === 'image' ? '📷' : '🎬') : ''),
+                    media: mediaUrl, mediaType, likes: [], comments: [], reposts: 0, saved: [], views: 0
+                });
                 if (error) throw error;
-                
                 postText.value = '';
                 postMedia.value = '';
                 await loadPosts();
                 showPage('home');
-                
             } catch (e) {
-                console.error('Error creating post:', e);
                 alert('❌ Error creating post: ' + e.message);
             } finally {
                 submitPost.textContent = 'Post';
@@ -713,197 +388,76 @@
             }
         });
 
-        // Delete Post
         async function deletePost(postId) {
             if (!confirm('Delete this post?')) return;
             try {
-                const { error } = await supabase
-                    .from('posts')
-                    .delete()
-                    .eq('id', postId);
-                
-                if (error) throw error;
+                await supabase.from('posts').delete().eq('id', postId);
                 await loadPosts();
                 renderVideoTikTok();
-            } catch (e) {
-                alert('Error deleting post: ' + e.message);
-            }
+            } catch (e) { alert('Error deleting post: ' + e.message); }
         }
 
-        // Toggle Like
         async function toggleLike(postId) {
             try {
                 const post = posts.find(p => p.id === postId);
                 if (!post) return;
-                
                 let likes = post.likes || [];
                 const idx = likes.indexOf(currentUser);
-                
-                if (idx > -1) {
-                    likes.splice(idx, 1);
-                } else {
-                    likes.push(currentUser);
-                }
-                
-                const { error } = await supabase
-                    .from('posts')
-                    .update({ likes: likes })
-                    .eq('id', postId);
-                
-                if (error) throw error;
+                if (idx > -1) likes.splice(idx, 1);
+                else likes.push(currentUser);
+                await supabase.from('posts').update({ likes }).eq('id', postId);
                 await loadPosts();
-            } catch (e) {
-                console.error('Error toggling like:', e);
-            }
+            } catch (e) { console.error('Error toggling like:', e); }
         }
 
-        // Toggle Save
         async function toggleSave(postId) {
             try {
                 const post = posts.find(p => p.id === postId);
                 if (!post) return;
-                
                 let saved = post.saved || [];
                 const idx = saved.indexOf(currentUser);
-                
-                if (idx > -1) {
-                    saved.splice(idx, 1);
-                } else {
-                    saved.push(currentUser);
-                }
-                
-                const { error } = await supabase
-                    .from('posts')
-                    .update({ saved: saved })
-                    .eq('id', postId);
-                
-                if (error) throw error;
+                if (idx > -1) saved.splice(idx, 1);
+                else saved.push(currentUser);
+                await supabase.from('posts').update({ saved }).eq('id', postId);
                 await loadPosts();
-            } catch (e) {
-                console.error('Error toggling save:', e);
-            }
+            } catch (e) { console.error('Error toggling save:', e); }
         }
 
-        // Add Repost
         async function addRepost(postId) {
             try {
                 const post = posts.find(p => p.id === postId);
                 if (!post) return;
-                
                 const reposts = (post.reposts || 0) + 1;
-                
-                const { error } = await supabase
-                    .from('posts')
-                    .update({ reposts: reposts })
-                    .eq('id', postId);
-                
-                if (error) throw error;
-                
-                // Create repost
-                await supabase
-                    .from('posts')
-                    .insert({
-                        username: currentUser,
-                        text: '🔁 Repost from ' + post.username + ': ' + (post.text || ''),
-                        media: post.media,
-                        mediaType: post.mediaType,
-                        likes: [],
-                        comments: [],
-                        reposts: 0,
-                        saved: [],
-                        views: 0
-                    });
-                
+                await supabase.from('posts').update({ reposts }).eq('id', postId);
+                await supabase.from('posts').insert({
+                    username: currentUser,
+                    text: '🔁 Repost from ' + post.username + ': ' + (post.text || ''),
+                    media: post.media, mediaType: post.mediaType,
+                    likes: [], comments: [], reposts: 0, saved: [], views: 0
+                });
                 await loadPosts();
-            } catch (e) {
-                console.error('Error reposting:', e);
-            }
+            } catch (e) { console.error('Error reposting:', e); }
         }
 
-        // Add Comment
         async function addComment(postId, text) {
             try {
                 const post = posts.find(p => p.id === postId);
                 if (!post) return;
-                
                 const comments = post.comments || [];
-                comments.push({
-                    username: currentUser,
-                    text: text,
-                    timestamp: Date.now()
-                });
-                
-                const { error } = await supabase
-                    .from('posts')
-                    .update({ comments: comments })
-                    .eq('id', postId);
-                
-                if (error) throw error;
+                comments.push({ username: currentUser, text, timestamp: Date.now() });
+                await supabase.from('posts').update({ comments }).eq('id', postId);
                 await loadPosts();
-            } catch (e) {
-                console.error('Error adding comment:', e);
-            }
+            } catch (e) { console.error('Error adding comment:', e); }
         }
 
-        // Add View
         async function addView(postId) {
             try {
                 const post = posts.find(p => p.id === postId);
                 if (!post) return;
-                
                 const views = (post.views || 0) + 1;
-                
-                const { error } = await supabase
-                    .from('posts')
-                    .update({ views: views })
-                    .eq('id', postId);
-                
-                if (error) throw error;
-            } catch (e) {
-                console.error('Error adding view:', e);
-            }
+                await supabase.from('posts').update({ views }).eq('id', postId);
+            } catch (e) { console.error('Error adding view:', e); }
         }
-
-        // Follow/Unfollow
-        async function toggleFollow() {
-            if (!viewingUser || viewingUser === currentUser) return;
-            
-            try {
-                const currentUserData = users[currentUser];
-                const targetUserData = users[viewingUser];
-                
-                let following = currentUserData?.following || [];
-                let followers = targetUserData?.followers || [];
-                
-                const idx = following.indexOf(viewingUser);
-                
-                if (idx > -1) {
-                    following.splice(idx, 1);
-                    const fIdx = followers.indexOf(currentUser);
-                    if (fIdx > -1) followers.splice(fIdx, 1);
-                } else {
-                    following.push(viewingUser);
-                    followers.push(currentUser);
-                }
-                
-                await supabase
-                    .from('users')
-                    .update({ following: following })
-                    .eq('username', currentUser);
-                
-                await supabase
-                    .from('users')
-                    .update({ followers: followers })
-                    .eq('username', viewingUser);
-                
-                await loadUsers();
-                viewProfile(viewingUser);
-            } catch (e) {
-                console.error('Error following user:', e);
-            }
-        }
-
-        // ============= RENDER FUNCTIONS =============
 
         function renderPosts() {
             const query = searchInput.value.toLowerCase();
@@ -912,18 +466,15 @@
                 const matchText = (p.text || '').toLowerCase().includes(query);
                 return matchUser || matchText;
             });
-            
             if (currentTab === 'following') {
                 const following = users[currentUser]?.following || [];
                 filtered = filtered.filter(p => following.includes(p.username));
             }
-            
             postsContainer.innerHTML = '';
             if (!filtered.length) {
                 postsContainer.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">No posts found.</p>';
                 return;
             }
-            
             filtered.forEach(p => {
                 const div = document.createElement('div');
                 div.className = 'masonry-item';
@@ -931,11 +482,9 @@
                 if (p.mediaType === 'image' && p.media) mediaHTML = `<img src="${p.media}">`;
                 else if (p.mediaType === 'video' && p.media) mediaHTML = `<video src="${p.media}" muted></video>`;
                 else mediaHTML = `<div class="icon-big">📝</div>`;
-                
                 const liked = p.likes && p.likes.includes(currentUser);
                 const saved = p.saved && p.saved.includes(currentUser);
                 const isOwner = p.username === currentUser;
-                
                 div.innerHTML = `
                     ${mediaHTML}
                     <div class="overlay">
@@ -1012,7 +561,6 @@
                 container.innerHTML = '<p style="color:#888; text-align:center; padding: 40px;">No videos yet.</p>';
                 return;
             }
-            
             videos.forEach(p => {
                 const slide = document.createElement('div');
                 slide.className = 'video-slide';
@@ -1020,13 +568,9 @@
                 const saved = p.saved && p.saved.includes(currentUser);
                 const isOwner = p.username === currentUser;
                 const avatar = users[p.username]?.avatar ? `<img src="${users[p.username].avatar}" class="video-avatar">` : `<div class="video-avatar default">${p.username.charAt(0).toUpperCase()}</div>`;
-                
                 slide.innerHTML = `
                     <video src="${p.media}" loop playsinline></video>
-                    <div class="video-header" onclick="viewProfile('${p.username}')">
-                        ${avatar}
-                        <span class="video-username">${p.username}</span>
-                    </div>
+                    <div class="video-header" onclick="viewProfile('${p.username}')">${avatar}<span class="video-username">${p.username}</span></div>
                     <div class="info">${p.username}: ${p.text || ''} • 👁️ ${p.views || 0}</div>
                     <div class="actions-right">
                         <span class="view-count">👁️ ${p.views||0}</span>
@@ -1038,19 +582,12 @@
                         <button class="share-btn" onclick="openShareModal('${p.id}')">📤</button>
                     </div>
                     <div class="player-controls">
-                        <div class="top-row">
-                            <button class="play-btn" data-id="${p.id}">▶️</button>
-                            <span class="time">0:00 / 0:00</span>
-                            <button class="mute-btn">🔊</button>
-                        </div>
-                        <div class="progress-bar" data-id="${p.id}">
-                            <div class="progress-fill" style="width:0%;"></div>
-                        </div>
+                        <div class="top-row"><button class="play-btn" data-id="${p.id}">▶️</button><span class="time">0:00 / 0:00</span><button class="mute-btn">🔊</button></div>
+                        <div class="progress-bar" data-id="${p.id}"><div class="progress-fill" style="width:0%;"></div></div>
                     </div>
                 `;
                 container.appendChild(slide);
             });
-            
             document.querySelectorAll('.play-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const slide = this.closest('.video-slide');
@@ -1091,7 +628,6 @@
                     }
                 });
             });
-            
             document.querySelectorAll('.like-btn-video').forEach(btn => {
                 btn.addEventListener('click', function() { toggleLike(this.dataset.id); });
             });
@@ -1113,12 +649,10 @@
                 case 'reposted': filtered = posts.filter(p => p.text && p.text.includes('Repost from') && p.username === currentUser); break;
                 default: filtered = userPosts;
             }
-            
             const user = users[currentUser];
             followersCount.textContent = (user?.followers || []).length;
             followingCount.textContent = (user?.following || []).length;
             postCount.textContent = userPosts.length;
-            
             userPostsDiv.innerHTML = '';
             if (!filtered.length) {
                 userPostsDiv.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No posts in this tab.</p>';
@@ -1148,19 +682,11 @@
             storiesContainer.innerHTML = '';
             const addDiv = document.createElement('div');
             addDiv.className = 'story-circle';
-            addDiv.innerHTML = `
-                <button class="add-btn" onclick="document.getElementById('storyMedia').click();">+</button>
-                <span class="name">Add</span>
-                <input type="file" id="storyMedia" accept="image/*,video/*" style="display:none;" onchange="addStory(event)">
-            `;
+            addDiv.innerHTML = `<button class="add-btn" onclick="document.getElementById('storyMedia').click();">+</button><span class="name">Add</span><input type="file" id="storyMedia" accept="image/*,video/*" style="display:none;" onchange="addStory(event)">`;
             storiesContainer.appendChild(addDiv);
-            
-            // Stories from Supabase would go here
-            // For now, just show placeholder
         }
 
         async function addStory(event) {
-            // Implementation for story upload to Supabase Storage
             alert('Story upload coming soon with Supabase Storage!');
             event.target.value = '';
         }
@@ -1169,28 +695,20 @@
             const post = posts.find(p => p.id === postId);
             if (!post) return;
             addView(postId);
-            
             const related = posts.filter(p => p.id !== postId && p.username === post.username);
             detailContainer.innerHTML = '';
-            
             const div = document.createElement('div');
             div.className = 'detail-item';
             let mediaHTML = '';
             if (post.mediaType === 'image' && post.media) mediaHTML = `<img src="${post.media}">`;
             else if (post.mediaType === 'video' && post.media) mediaHTML = `<video src="${post.media}" controls></video>`;
             else mediaHTML = `<div class="icon-big">📝</div>`;
-            
             const liked = post.likes && post.likes.includes(currentUser);
             const saved = post.saved && post.saved.includes(currentUser);
             const isOwner = post.username === currentUser;
-            
             div.innerHTML = `
                 ${mediaHTML}
-                <div class="info">
-                    <div class="username" style="cursor:pointer;" onclick="viewProfile('${post.username}')">${post.username}</div>
-                    <div class="text">${post.text || ''}</div>
-                    <div style="color:#666; font-size:12px; margin-top:4px;">👁️ ${post.views || 0} views</div>
-                </div>
+                <div class="info"><div class="username" style="cursor:pointer;" onclick="viewProfile('${post.username}')">${post.username}</div><div class="text">${post.text || ''}</div><div style="color:#666; font-size:12px; margin-top:4px;">👁️ ${post.views || 0} views</div></div>
                 <div class="detail-actions">
                     <span class="view-count">👁️ ${post.views || 0}</span>
                     <button class="like-btn-detail ${liked?'liked':''}" data-id="${post.id}">❤️ ${post.likes?post.likes.length:0}</button>
@@ -1211,7 +729,6 @@
             `;
             detailContainer.appendChild(div);
             showPage('detailPage');
-            
             document.querySelectorAll('.like-btn-detail').forEach(btn => {
                 btn.addEventListener('click', function() { toggleLike(this.dataset.id); });
             });
@@ -1227,12 +744,10 @@
             if (!users[username]) { alert('User not found'); return; }
             viewingUser = username;
             const user = users[username];
-            
             viewerName.textContent = username;
             viewerAvatar.innerHTML = user.avatar ? `<img src="${user.avatar}">` : '👤';
             viewerFollowersCount.textContent = (user.followers || []).length;
             viewerFollowingCount.textContent = (user.following || []).length;
-            
             if (username === currentUser) {
                 viewerFollowBtn.style.display = 'none';
             } else {
@@ -1241,7 +756,6 @@
                 viewerFollowBtn.textContent = isFollowing ? 'Following' : 'Follow';
                 viewerFollowBtn.className = isFollowing ? 'follow-btn following' : 'follow-btn';
             }
-            
             const userPosts = posts.filter(p => p.username === username);
             viewerPosts.innerHTML = '';
             if (!userPosts.length) {
@@ -1266,7 +780,6 @@
                 div.addEventListener('click', () => showDetail(p.id));
                 viewerPosts.appendChild(div);
             });
-            
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             profileViewer.classList.add('active');
         }
@@ -1276,11 +789,33 @@
             showPage('home');
         }
 
+        async function toggleFollow() {
+            if (!viewingUser || viewingUser === currentUser) return;
+            try {
+                const currentUserData = users[currentUser];
+                const targetUserData = users[viewingUser];
+                let following = currentUserData?.following || [];
+                let followers = targetUserData?.followers || [];
+                const idx = following.indexOf(viewingUser);
+                if (idx > -1) {
+                    following.splice(idx, 1);
+                    const fIdx = followers.indexOf(currentUser);
+                    if (fIdx > -1) followers.splice(fIdx, 1);
+                } else {
+                    following.push(viewingUser);
+                    followers.push(currentUser);
+                }
+                await supabase.from('users').update({ following }).eq('username', currentUser);
+                await supabase.from('users').update({ followers }).eq('username', viewingUser);
+                await loadUsers();
+                viewProfile(viewingUser);
+            } catch (e) { console.error('Error following user:', e); }
+        }
+
         function openCommentsOverlay(postId) {
             activeCommentPostId = postId;
             const post = posts.find(p => p.id === postId);
             if (!post) return;
-            
             commentsOverlayContent.innerHTML = '';
             if (post.comments && post.comments.length) {
                 post.comments.slice().reverse().forEach(c => {
@@ -1288,11 +823,7 @@
                     div.className = 'comment-item';
                     const avatar = users[c.username]?.avatar ? `<img src="${users[c.username].avatar}" class="comment-avatar">` : `<div class="comment-avatar default">${c.username.charAt(0).toUpperCase()}</div>`;
                     div.innerHTML = `
-                        <div class="comment-header">
-                            ${avatar}
-                            <span class="comment-username">${c.username}</span>
-                            <span style="font-size:10px;color:#666;">${new Date(c.timestamp || Date.now()).toLocaleDateString()}</span>
-                        </div>
+                        <div class="comment-header">${avatar}<span class="comment-username">${c.username}</span><span style="font-size:10px;color:#666;">${new Date(c.timestamp || Date.now()).toLocaleDateString()}</span></div>
                         <div class="comment-text">${c.text}</div>
                     `;
                     commentsOverlayContent.appendChild(div);
@@ -1318,15 +849,12 @@
         });
 
         function openFollowModal(type) {
-            followModalType = type;
             const targetUser = viewingUser || currentUser;
             const user = users[targetUser];
             if (!user) return;
-            
             const list = type === 'followers' ? (user.followers || []) : (user.following || []);
             followModalTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
             followList.innerHTML = '';
-            
             if (!list.length) {
                 followList.innerHTML = '<p style="color:#888; text-align:center; padding:16px;">No users yet.</p>';
             } else {
@@ -1391,57 +919,37 @@
         function performUserSearch() {
             const query = userSearchInput.value.trim().toLowerCase();
             userSearchResults.innerHTML = '';
-            
             if (!query) {
                 userSearchResults.innerHTML = '<div class="no-search-results">Type to search for users...</div>';
                 return;
             }
-
             const results = Object.keys(users).filter(u => u.toLowerCase().includes(query));
-            
             if (!results.length) {
                 userSearchResults.innerHTML = '<div class="no-search-results">No users found matching "' + query + '"</div>';
                 return;
             }
-
             results.forEach(u => {
                 const user = users[u];
                 const isFollowing = (users[currentUser]?.following || []).includes(u);
                 const isSelf = u === currentUser;
-                
                 const div = document.createElement('div');
                 div.className = 'user-search-item';
-                
                 const avatarContent = user.avatar ? `<img src="${user.avatar}">` : u.charAt(0).toUpperCase();
                 const followerCount = (user.followers || []).length;
-                
                 let badgeHTML = '';
-                if (isSelf) {
-                    badgeHTML = '<span class="follow-badge" style="background:#444;">You</span>';
-                } else if (isFollowing) {
-                    badgeHTML = '<span class="follow-badge following">Following</span>';
-                } else {
-                    badgeHTML = '<span class="follow-badge">Follow</span>';
-                }
-                
+                if (isSelf) badgeHTML = '<span class="follow-badge" style="background:#444;">You</span>';
+                else if (isFollowing) badgeHTML = '<span class="follow-badge following">Following</span>';
+                else badgeHTML = '<span class="follow-badge">Follow</span>';
                 div.innerHTML = `
                     <div class="avatar">${avatarContent}</div>
-                    <div class="info">
-                        <div class="username">${u}</div>
-                        <div class="bio">${followerCount} followers</div>
-                    </div>
+                    <div class="info"><div class="username">${u}</div><div class="bio">${followerCount} followers</div></div>
                     ${badgeHTML}
                 `;
-                
                 div.addEventListener('click', () => {
                     closeUserSearch();
-                    if (isSelf) {
-                        showPage('profile');
-                    } else {
-                        viewProfile(u);
-                    }
+                    if (isSelf) showPage('profile');
+                    else viewProfile(u);
                 });
-                
                 userSearchResults.appendChild(div);
             });
         }
@@ -1462,11 +970,7 @@
                 const div = document.createElement('div');
                 div.className = 'chat-user-item';
                 const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
-                div.innerHTML = `
-                    <div class="avatar">${avatar}</div>
-                    <div class="name">${u}</div>
-                    <div class="last-msg">🔜 Chat coming soon</div>
-                `;
+                div.innerHTML = `<div class="avatar">${avatar}</div><div class="name">${u}</div><div class="last-msg">🔜 Chat coming soon</div>`;
                 div.addEventListener('click', () => {
                     alert('🔜 Chat feature coming soon!');
                 });
@@ -1486,15 +990,12 @@
             }
             searchResults.style.display = 'block';
             searchResults.innerHTML = '';
-            
             const userResults = Object.keys(users).filter(u => u.toLowerCase().includes(query));
             const postResults = posts.filter(p => p.text && p.text.toLowerCase().includes(query));
-            
             if (!userResults.length && !postResults.length) {
                 searchResults.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No results found.</p>';
                 return;
             }
-            
             if (userResults.length) {
                 const h = document.createElement('h4');
                 h.textContent = 'Users';
@@ -1512,7 +1013,6 @@
                     searchResults.appendChild(div);
                 });
             }
-            
             if (postResults.length) {
                 const h = document.createElement('h4');
                 h.textContent = 'Posts';
@@ -1545,51 +1045,21 @@
         async function saveAccountSettings() {
             const newUsername = document.getElementById('editUsername').value.trim();
             const newPassword = document.getElementById('editPassword').value.trim();
-            
             if (!newUsername) return alert('Username cannot be empty');
-            
             try {
                 if (newUsername !== currentUser) {
-                    // Check if username exists
-                    const { data } = await supabase
-                        .from('users')
-                        .select('username')
-                        .eq('username', newUsername);
-                    
-                    if (data && data.length > 0) {
-                        alert('Username already taken!');
-                        return;
-                    }
-                    
-                    // Update posts
-                    await supabase
-                        .from('posts')
-                        .update({ username: newUsername })
-                        .eq('username', currentUser);
-                    
-                    // Update user
-                    await supabase
-                        .from('users')
-                        .update({ username: newUsername })
-                        .eq('username', currentUser);
-                    
-                    // If password is provided, update it
+                    const { data } = await supabase.from('users').select('username').eq('username', newUsername);
+                    if (data && data.length > 0) { alert('Username already taken!'); return; }
+                    await supabase.from('posts').update({ username: newUsername }).eq('username', currentUser);
+                    await supabase.from('users').update({ username: newUsername }).eq('username', currentUser);
                     if (newPassword) {
-                        await supabase
-                            .from('users')
-                            .update({ password: newPassword })
-                            .eq('username', newUsername);
+                        await supabase.from('users').update({ password: newPassword }).eq('username', newUsername);
                     }
-                    
                     currentUser = newUsername;
                     localStorage.setItem('currentUser', currentUser);
                 } else if (newPassword) {
-                    await supabase
-                        .from('users')
-                        .update({ password: newPassword })
-                        .eq('username', currentUser);
+                    await supabase.from('users').update({ password: newPassword }).eq('username', currentUser);
                 }
-                
                 await loadUsers();
                 await loadPosts();
                 updateUI();
@@ -1603,16 +1073,8 @@
         async function deleteAccount() {
             if (!confirm('Delete your account? This cannot be undone!')) return;
             try {
-                await supabase
-                    .from('users')
-                    .delete()
-                    .eq('username', currentUser);
-                
-                await supabase
-                    .from('posts')
-                    .delete()
-                    .eq('username', currentUser);
-                
+                await supabase.from('users').delete().eq('username', currentUser);
+                await supabase.from('posts').delete().eq('username', currentUser);
                 currentUser = null;
                 localStorage.removeItem('currentUser');
                 await loadUsers();
@@ -1626,10 +1088,7 @@
 
         function closeStory() {
             storyViewer.classList.remove('active');
-            if (storyVideo) {
-                storyVideo.pause();
-                storyVideo.src = '';
-            }
+            if (storyVideo) { storyVideo.pause(); storyVideo.src = ''; }
             storyImage.src = '';
             storyProgressFill.style.width = '0%';
             if (storyInterval) { clearInterval(storyInterval); storyInterval = null; }
@@ -1659,14 +1118,11 @@
         const savedTheme = localStorage.getItem('theme') || 'dark';
         setTheme(savedTheme);
 
-        // ============= NAVIGATION =============
-
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
-            
             if (id === 'home') renderPosts();
             if (id === 'video') renderVideoTikTok();
             if (id === 'chat') renderChatUserList();
@@ -1709,19 +1165,13 @@
         avatarInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
             try {
                 const reader = new FileReader();
                 const avatarData = await new Promise((resolve) => {
                     reader.onload = () => resolve(reader.result);
                     reader.readAsDataURL(file);
                 });
-                
-                await supabase
-                    .from('users')
-                    .update({ avatar: avatarData })
-                    .eq('username', currentUser);
-                
+                await supabase.from('users').update({ avatar: avatarData }).eq('username', currentUser);
                 await loadUsers();
                 profileAvatar.innerHTML = `<img src="${avatarData}">`;
                 alert('✅ Avatar updated!');
@@ -1748,11 +1198,9 @@
             }
         }
 
-        // ============= INIT =============
         async function init() {
             await loadUsers();
             await loadPosts();
-            
             if (localStorage.getItem('currentUser')) {
                 currentUser = localStorage.getItem('currentUser');
                 if (users[currentUser]) {
@@ -1763,7 +1211,6 @@
                     updateUI();
                 }
             }
-            
             switchMode();
         }
 
