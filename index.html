@@ -4,13 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Social App</title>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background: #000; color: #fff; height: 100vh; display: flex; flex-direction: column; }
@@ -207,128 +202,25 @@
         .notification-item .avatar img { width: 100%; height: 100%; object-fit: cover; }
         .notification-item .text { flex: 1; color: #ccc; font-size: 14px; }
         .notification-item .time { color: #666; font-size: 11px; }
-
-        .user-search-btn {
-            background: #222;
-            border: none;
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.3s;
-        }
+        .user-search-btn { background: #222; border: none; color: #fff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
         .user-search-btn:hover { background: #333; }
-
-        #userSearchOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.92);
-            z-index: 5000;
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-        }
+        #userSearchOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); z-index: 5000; display: none; flex-direction: column; padding: 20px; }
         #userSearchOverlay.active { display: flex; }
-        #userSearchOverlay .search-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        #userSearchOverlay .search-header input {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 25px;
-            border: none;
-            background: #222;
-            color: #fff;
-            font-size: 16px;
-            outline: none;
-        }
-        #userSearchOverlay .search-header .close-search {
-            background: #333;
-            border: none;
-            color: #fff;
-            font-size: 24px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        #userSearchResults {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 0;
-        }
-        .user-search-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            color: #fff;
-            transition: background 0.2s;
-        }
+        #userSearchOverlay .search-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        #userSearchOverlay .search-header input { flex: 1; padding: 12px 16px; border-radius: 25px; border: none; background: #222; color: #fff; font-size: 16px; outline: none; }
+        #userSearchOverlay .search-header .close-search { background: #333; border: none; color: #fff; font-size: 24px; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; }
+        #userSearchResults { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .user-search-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px; cursor: pointer; color: #fff; transition: background 0.2s; }
         .user-search-item:hover { background: #1a1a2e; }
-        .user-search-item .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        .user-search-item .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .user-search-item .info {
-            flex: 1;
-        }
-        .user-search-item .info .username {
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .user-search-item .info .bio {
-            color: #888;
-            font-size: 13px;
-        }
-        .user-search-item .follow-badge {
-            background: #ff0050;
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .user-search-item .follow-badge.following {
-            background: #333;
-        }
-        .no-search-results {
-            color: #888;
-            text-align: center;
-            padding: 40px 20px;
-            font-size: 16px;
-        }
-        .loading-spinner {
-            text-align: center;
-            padding: 40px;
-            color: #888;
-            font-size: 20px;
-        }
+        .user-search-item .avatar { width: 48px; height: 48px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; }
+        .user-search-item .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-search-item .info { flex: 1; }
+        .user-search-item .info .username { font-weight: bold; font-size: 16px; }
+        .user-search-item .info .bio { color: #888; font-size: 13px; }
+        .user-search-item .follow-badge { background: #ff0050; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .user-search-item .follow-badge.following { background: #333; }
+        .no-search-results { color: #888; text-align: center; padding: 40px 20px; font-size: 16px; }
+        .loading-spinner { text-align: center; padding: 40px; color: #888; font-size: 20px; }
     </style>
 </head>
 <body>
@@ -525,40 +417,24 @@
     </div>
 
     <script>
-        // ============= FIREBASE CONFIG =============
-        const firebaseConfig = {
-            apiKey: "AIzaSyBYUIcb24PfUNrJIoi5yhcVdtjoM6GRTBA",
-            authDomain: "yourname-96b27.firebaseapp.com",
-            projectId: "yourname-96b27",
-            storageBucket: "yourname-96b27.firebasestorage.app",
-            messagingSenderId: "508094145435",
-            appId: "1:508094145435:web:9d2e851a856f23baa2f73e",
-            measurementId: "G-5LJ15MBZNL"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-        const auth = firebase.auth();
-
-        // ============= GLOBAL STATE =============
-        let users = {};
+        // ============= SUPABASE CONFIG =============
+        const SUPABASE_URL = 'https://ynsrwogjstrgfbqyvvhq.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_aeE5Kjw9B5wlpQ0rTLrKrw_wDWJ1yOS';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        
+        // ============= STATE =============
+        let currentUser = localStorage.getItem('currentUser') || null;
         let posts = [];
-        let chats = [];
-        let stories = [];
-        let notifications = [];
-        let currentUser = null;
+        let users = {};
         let currentTab = 'forYou';
-        let videoFiles = {};
-        let activeCommentPostId = null;
         let viewingUser = null;
-        let sharePostId = null;
         let profileTab = 'myposts';
-        let followModalType = 'followers';
         let selectedChatUser = null;
         let isLogin = true;
         let storyInterval = null;
-        let listenerUnsubscribes = [];
+        let activeCommentPostId = null;
+        let sharePostId = null;
 
         // ============= DOM REFS =============
         const authPage = document.getElementById('auth');
@@ -621,252 +497,273 @@
         const avatarInput = document.getElementById('avatarInput');
         const logoutBtn = document.getElementById('logoutBtn');
 
-        // ============= FIREBASE HELPERS =============
-        async function uploadFile(file, path) {
-            const ref = storage.ref(path);
-            await ref.put(file);
-            return await ref.getDownloadURL();
-        }
-
-        function getFileExtension(filename) {
-            return filename.split('.').pop();
-        }
-
-        // ============= LISTENERS =============
-        function setupFirebaseListeners() {
-            // Detach old listeners
-            listenerUnsubscribes.forEach(unsub => unsub());
-            listenerUnsubscribes = [];
-
-            // Posts listener
-            const unsubPosts = db.collection('posts')
-                .orderBy('timestamp', 'desc')
-                .onSnapshot(snapshot => {
-                    posts = [];
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        data.id = doc.id;
-                        posts.push(data);
-                    });
-                    renderPosts();
-                    renderVideoTikTok();
-                    renderExplore();
-                    renderUserPosts();
-                    if (viewingUser) viewProfile(viewingUser);
-                });
-            listenerUnsubscribes.push(unsubPosts);
-
-            // Users listener
-            const unsubUsers = db.collection('users').onSnapshot(snapshot => {
-                users = {};
-                snapshot.forEach(doc => {
-                    users[doc.id] = doc.data();
-                });
-                updateUI();
-            });
-            listenerUnsubscribes.push(unsubUsers);
-
-            // Stories listener
-            const unsubStories = db.collection('stories')
-                .orderBy('timestamp', 'desc')
-                .onSnapshot(snapshot => {
-                    stories = [];
-                    snapshot.forEach(doc => {
-                        stories.push({ id: doc.id, ...doc.data() });
-                    });
-                    renderStories();
-                });
-            listenerUnsubscribes.push(unsubStories);
-
-            // Chats listener
-            const unsubChats = db.collection('chats')
-                .orderBy('timestamp', 'asc')
-                .onSnapshot(snapshot => {
-                    chats = [];
-                    snapshot.forEach(doc => {
-                        chats.push({ id: doc.id, ...doc.data() });
-                    });
-                    renderChatUserList();
-                    if (selectedChatUser) renderPrivateChat(selectedChatUser);
-                });
-            listenerUnsubscribes.push(unsubChats);
-
-            // Notifications listener
-            const unsubNotifs = db.collection('notifications')
-                .orderBy('timestamp', 'desc')
-                .onSnapshot(snapshot => {
-                    notifications = [];
-                    snapshot.forEach(doc => {
-                        notifications.push({ id: doc.id, ...doc.data() });
-                    });
-                    renderNotifications();
-                });
-            listenerUnsubscribes.push(unsubNotifs);
-        }
-
-        // ============= AUTH =============
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user.displayName || user.email;
-                localStorage.setItem('currentUser', currentUser);
-                setupFirebaseListeners();
-                updateUI();
-            } else {
-                currentUser = null;
-                localStorage.removeItem('currentUser');
-                updateUI();
-            }
-        });
-
-        loginBtn.addEventListener('click', async () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            if (!username || !password) return alert('Fill all fields');
-            
+        // ============= FUNCTIONS =============
+        
+        // Load posts from Supabase
+        async function loadPosts() {
             try {
-                const email = username + '@socialapp.com';
-                await auth.signInWithEmailAndPassword(email, password);
+                const { data, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                posts = data || [];
+                renderPosts();
+                renderExplore();
+                renderUserPosts();
+                if (viewingUser) viewProfile(viewingUser);
             } catch (e) {
-                alert('Login failed: ' + e.message);
+                console.error('Error loading posts:', e);
             }
-        });
+        }
 
+        // Load users from Supabase
+        async function loadUsers() {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*');
+                
+                if (error) throw error;
+                users = {};
+                data.forEach(u => { users[u.username] = u; });
+                updateUI();
+            } catch (e) {
+                console.error('Error loading users:', e);
+            }
+        }
+
+        // Register
         registerBtn.addEventListener('click', async () => {
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
-            if (!username || !password) return alert('Fill all fields');
+            
+            if (!username || !password) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            if (username.length < 3) {
+                alert('Username must be at least 3 characters');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
             
             try {
-                const email = username + '@socialapp.com';
-                const cred = await auth.createUserWithEmailAndPassword(email, password);
-                await cred.user.updateProfile({ displayName: username });
+                registerBtn.textContent = '⏳ Registering...';
+                registerBtn.disabled = true;
                 
-                // Create user in Firestore
-                await db.collection('users').doc(username).set({
-                    password: password,
-                    avatar: null,
-                    followers: [],
-                    following: [],
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                // Check if user exists
+                const { data: existing, error: checkError } = await supabase
+                    .from('users')
+                    .select('username')
+                    .eq('username', username);
+                
+                if (existing && existing.length > 0) {
+                    alert('Username already taken!');
+                    return;
+                }
+                
+                // Create user
+                const { error: insertError } = await supabase
+                    .from('users')
+                    .insert({
+                        username: username,
+                        password: password,
+                        avatar: null,
+                        followers: [],
+                        following: []
+                    });
+                
+                if (insertError) throw insertError;
                 
                 currentUser = username;
-                localStorage.setItem('currentUser', username);
-                setupFirebaseListeners();
+                localStorage.setItem('currentUser', currentUser);
+                
+                await loadUsers();
+                await loadPosts();
                 updateUI();
+                
+                alert('✅ Registration successful! Welcome ' + username);
+                usernameInput.value = '';
+                passwordInput.value = '';
+                
             } catch (e) {
-                alert('Registration failed: ' + e.message);
+                console.error('Registration error:', e);
+                alert('❌ Registration failed: ' + e.message);
+            } finally {
+                registerBtn.textContent = 'Register';
+                registerBtn.disabled = false;
             }
         });
 
-        logoutBtn.addEventListener('click', async () => {
-            await auth.signOut();
+        // Login
+        loginBtn.addEventListener('click', async () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!username || !password) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            try {
+                loginBtn.textContent = '⏳ Logging in...';
+                loginBtn.disabled = true;
+                
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('password', password);
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    alert('Invalid username or password');
+                    return;
+                }
+                
+                currentUser = username;
+                localStorage.setItem('currentUser', currentUser);
+                
+                await loadUsers();
+                await loadPosts();
+                updateUI();
+                
+                usernameInput.value = '';
+                passwordInput.value = '';
+                
+            } catch (e) {
+                console.error('Login error:', e);
+                alert('❌ Login failed: ' + e.message);
+            } finally {
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
             currentUser = null;
             localStorage.removeItem('currentUser');
             updateUI();
         });
 
-        function switchMode() {
-            isLogin = !isLogin;
-            loginBtn.style.display = isLogin ? 'block' : 'none';
-            registerBtn.style.display = isLogin ? 'none' : 'block';
-            switchAuth.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Login";
-        }
-        switchAuth.addEventListener('click', switchMode);
-
-        // ============= POST OPERATIONS =============
-        async function createPost(text, username, file) {
-            try {
-                let mediaUrl = null;
-                let mediaType = 'text';
-                
-                if (file) {
-                    mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-                    const ext = getFileExtension(file.name);
-                    const path = `posts/${Date.now()}_${username}.${ext}`;
-                    mediaUrl = await uploadFile(file, path);
-                }
-                
-                const postData = {
-                    username: username || currentUser,
-                    text: text || (file ? (mediaType === 'image' ? '📷' : '🎬') : ''),
-                    media: mediaUrl,
-                    mediaType: mediaType,
-                    likes: [],
-                    comments: [],
-                    reposts: 0,
-                    saved: [],
-                    views: 0,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                await db.collection('posts').add(postData);
-                
-                if (file && mediaType === 'video') {
-                    videoFiles[Date.now()] = URL.createObjectURL(file);
-                }
-            } catch (e) {
-                alert('Error creating post: ' + e.message);
-            }
-        }
-
+        // Create Post
         submitPost.addEventListener('click', async () => {
             const text = postText.value.trim();
             const username = postUsername.value.trim() || currentUser;
-            const file = postMedia.files[0];
             
-            if (!text && !file) return alert('Write something or add media');
+            if (!text && !postMedia.files[0]) {
+                alert('Write something or add media');
+                return;
+            }
             
-            await createPost(text, username, file);
-            
-            postText.value = '';
-            postMedia.value = '';
-            showPage('home');
+            try {
+                submitPost.textContent = '⏳ Posting...';
+                submitPost.disabled = true;
+                
+                let mediaUrl = null;
+                let mediaType = 'text';
+                
+                const file = postMedia.files[0];
+                if (file) {
+                    mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+                    // Convert to base64 for Supabase (or you can use Supabase Storage)
+                    const reader = new FileReader();
+                    mediaUrl = await new Promise((resolve) => {
+                        reader.onload = () => resolve(reader.result);
+                        reader.readAsDataURL(file);
+                    });
+                }
+                
+                const { error } = await supabase
+                    .from('posts')
+                    .insert({
+                        username: username,
+                        text: text || (file ? (mediaType === 'image' ? '📷' : '🎬') : ''),
+                        media: mediaUrl,
+                        mediaType: mediaType,
+                        likes: [],
+                        comments: [],
+                        reposts: 0,
+                        saved: [],
+                        views: 0
+                    });
+                
+                if (error) throw error;
+                
+                postText.value = '';
+                postMedia.value = '';
+                await loadPosts();
+                showPage('home');
+                
+            } catch (e) {
+                console.error('Error creating post:', e);
+                alert('❌ Error creating post: ' + e.message);
+            } finally {
+                submitPost.textContent = 'Post';
+                submitPost.disabled = false;
+            }
         });
 
+        // Delete Post
         async function deletePost(postId) {
             if (!confirm('Delete this post?')) return;
             try {
-                await db.collection('posts').doc(postId).delete();
+                const { error } = await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('id', postId);
+                
+                if (error) throw error;
+                await loadPosts();
+                renderVideoTikTok();
             } catch (e) {
-                alert('Error deleting: ' + e.message);
+                alert('Error deleting post: ' + e.message);
             }
         }
 
+        // Toggle Like
         async function toggleLike(postId) {
             try {
-                const postRef = db.collection('posts').doc(postId);
-                const doc = await postRef.get();
-                const data = doc.data();
-                const likes = data.likes || [];
+                const post = posts.find(p => p.id === postId);
+                if (!post) return;
+                
+                let likes = post.likes || [];
                 const idx = likes.indexOf(currentUser);
                 
                 if (idx > -1) {
                     likes.splice(idx, 1);
                 } else {
                     likes.push(currentUser);
-                    if (data.username !== currentUser) {
-                        await db.collection('notifications').add({
-                            type: 'like',
-                            from: currentUser,
-                            targetId: data.username,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
                 }
                 
-                await postRef.update({ likes: likes });
+                const { error } = await supabase
+                    .from('posts')
+                    .update({ likes: likes })
+                    .eq('id', postId);
+                
+                if (error) throw error;
+                await loadPosts();
             } catch (e) {
                 console.error('Error toggling like:', e);
             }
         }
 
+        // Toggle Save
         async function toggleSave(postId) {
             try {
-                const postRef = db.collection('posts').doc(postId);
-                const doc = await postRef.get();
-                const data = doc.data();
-                const saved = data.saved || [];
+                const post = posts.find(p => p.id === postId);
+                if (!post) return;
+                
+                let saved = post.saved || [];
                 const idx = saved.indexOf(currentUser);
                 
                 if (idx > -1) {
@@ -875,257 +772,139 @@
                     saved.push(currentUser);
                 }
                 
-                await postRef.update({ saved: saved });
+                const { error } = await supabase
+                    .from('posts')
+                    .update({ saved: saved })
+                    .eq('id', postId);
+                
+                if (error) throw error;
+                await loadPosts();
             } catch (e) {
                 console.error('Error toggling save:', e);
             }
         }
 
+        // Add Repost
         async function addRepost(postId) {
             try {
-                const postRef = db.collection('posts').doc(postId);
-                const doc = await postRef.get();
-                const data = doc.data();
-                const reposts = (data.reposts || 0) + 1;
+                const post = posts.find(p => p.id === postId);
+                if (!post) return;
                 
-                await postRef.update({ reposts: reposts });
+                const reposts = (post.reposts || 0) + 1;
+                
+                const { error } = await supabase
+                    .from('posts')
+                    .update({ reposts: reposts })
+                    .eq('id', postId);
+                
+                if (error) throw error;
                 
                 // Create repost
-                const repostData = {
-                    username: currentUser,
-                    text: '🔁 Repost from ' + data.username + ': ' + (data.text || ''),
-                    media: data.media,
-                    mediaType: data.mediaType,
-                    likes: [],
-                    comments: [],
-                    reposts: 0,
-                    saved: [],
-                    views: 0,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
+                await supabase
+                    .from('posts')
+                    .insert({
+                        username: currentUser,
+                        text: '🔁 Repost from ' + post.username + ': ' + (post.text || ''),
+                        media: post.media,
+                        mediaType: post.mediaType,
+                        likes: [],
+                        comments: [],
+                        reposts: 0,
+                        saved: [],
+                        views: 0
+                    });
                 
-                await db.collection('posts').add(repostData);
+                await loadPosts();
             } catch (e) {
                 console.error('Error reposting:', e);
             }
         }
 
+        // Add Comment
         async function addComment(postId, text) {
             try {
-                const postRef = db.collection('posts').doc(postId);
-                const doc = await postRef.get();
-                const data = doc.data();
-                const comments = data.comments || [];
+                const post = posts.find(p => p.id === postId);
+                if (!post) return;
+                
+                const comments = post.comments || [];
                 comments.push({
                     username: currentUser,
                     text: text,
                     timestamp: Date.now()
                 });
                 
-                await postRef.update({ comments: comments });
+                const { error } = await supabase
+                    .from('posts')
+                    .update({ comments: comments })
+                    .eq('id', postId);
                 
-                if (data.username !== currentUser) {
-                    await db.collection('notifications').add({
-                        type: 'comment',
-                        from: currentUser,
-                        targetId: data.username,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
+                if (error) throw error;
+                await loadPosts();
             } catch (e) {
                 console.error('Error adding comment:', e);
             }
         }
 
+        // Add View
         async function addView(postId) {
             try {
-                const postRef = db.collection('posts').doc(postId);
-                const doc = await postRef.get();
-                const data = doc.data();
-                const views = (data.views || 0) + 1;
-                await postRef.update({ views: views });
+                const post = posts.find(p => p.id === postId);
+                if (!post) return;
+                
+                const views = (post.views || 0) + 1;
+                
+                const { error } = await supabase
+                    .from('posts')
+                    .update({ views: views })
+                    .eq('id', postId);
+                
+                if (error) throw error;
             } catch (e) {
                 console.error('Error adding view:', e);
             }
         }
 
-        // ============= USER OPERATIONS =============
-        async function followUser(username) {
+        // Follow/Unfollow
+        async function toggleFollow() {
+            if (!viewingUser || viewingUser === currentUser) return;
+            
             try {
-                const userRef = db.collection('users').doc(currentUser);
-                const doc = await userRef.get();
-                const following = doc.data().following || [];
+                const currentUserData = users[currentUser];
+                const targetUserData = users[viewingUser];
                 
-                if (following.includes(username)) {
-                    // Unfollow
-                    const idx = following.indexOf(username);
+                let following = currentUserData?.following || [];
+                let followers = targetUserData?.followers || [];
+                
+                const idx = following.indexOf(viewingUser);
+                
+                if (idx > -1) {
                     following.splice(idx, 1);
-                    await userRef.update({ following: following });
-                    
-                    const targetRef = db.collection('users').doc(username);
-                    const targetDoc = await targetRef.get();
-                    const followers = targetDoc.data().followers || [];
                     const fIdx = followers.indexOf(currentUser);
                     if (fIdx > -1) followers.splice(fIdx, 1);
-                    await targetRef.update({ followers: followers });
                 } else {
-                    // Follow
-                    following.push(username);
-                    await userRef.update({ following: following });
-                    
-                    const targetRef = db.collection('users').doc(username);
-                    const targetDoc = await targetRef.get();
-                    const followers = targetDoc.data().followers || [];
+                    following.push(viewingUser);
                     followers.push(currentUser);
-                    await targetRef.update({ followers: followers });
-                    
-                    await db.collection('notifications').add({
-                        type: 'follow',
-                        from: currentUser,
-                        targetId: username,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
                 }
+                
+                await supabase
+                    .from('users')
+                    .update({ following: following })
+                    .eq('username', currentUser);
+                
+                await supabase
+                    .from('users')
+                    .update({ followers: followers })
+                    .eq('username', viewingUser);
+                
+                await loadUsers();
+                viewProfile(viewingUser);
             } catch (e) {
                 console.error('Error following user:', e);
             }
         }
 
-        // ============= CHAT OPERATIONS =============
-        async function sendMessage(to, text, media = null, mediaType = null) {
-            try {
-                const msgData = {
-                    from: currentUser,
-                    to: to,
-                    text: text || '',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                if (media) {
-                    msgData.media = media;
-                    msgData.mediaType = mediaType;
-                }
-                
-                await db.collection('chats').add(msgData);
-            } catch (e) {
-                console.error('Error sending message:', e);
-            }
-        }
+        // ============= RENDER FUNCTIONS =============
 
-        sendChatBtn.addEventListener('click', () => {
-            const text = chatInput.value.trim();
-            if (!text || !selectedChatUser) return;
-            sendMessage(selectedChatUser, text);
-            chatInput.value = '';
-        });
-
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') sendChatBtn.click();
-        });
-
-        async function sendChatMedia(event) {
-            const file = event.target.files[0];
-            if (!file || !selectedChatUser) return;
-            
-            try {
-                const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-                const ext = getFileExtension(file.name);
-                const path = `chats/${Date.now()}_${currentUser}.${ext}`;
-                const url = await uploadFile(file, path);
-                await sendMessage(selectedChatUser, '', url, mediaType);
-            } catch (e) {
-                alert('Error sending media: ' + e.message);
-            }
-            chatMediaInput.value = '';
-        }
-
-        // ============= STORY OPERATIONS =============
-        async function addStory(file) {
-            try {
-                const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-                const ext = getFileExtension(file.name);
-                const path = `stories/${Date.now()}_${currentUser}.${ext}`;
-                const url = await uploadFile(file, path);
-                
-                await db.collection('stories').add({
-                    username: currentUser,
-                    media: url,
-                    mediaType: mediaType,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            } catch (e) {
-                alert('Error adding story: ' + e.message);
-            }
-        }
-
-        // ============= PROFILE OPERATIONS =============
-        async function updateProfile(username, password, avatarFile) {
-            try {
-                const userRef = db.collection('users').doc(currentUser);
-                const updates = {};
-                
-                if (username && username !== currentUser) {
-                    // Check if username exists
-                    const check = await db.collection('users').doc(username).get();
-                    if (check.exists) return alert('Username already taken');
-                    
-                    // Update all posts
-                    const postsSnapshot = await db.collection('posts').where('username', '==', currentUser).get();
-                    postsSnapshot.forEach(doc => {
-                        doc.ref.update({ username: username });
-                    });
-                    
-                    // Update all chats
-                    const chatsSnapshot1 = await db.collection('chats').where('from', '==', currentUser).get();
-                    chatsSnapshot1.forEach(doc => {
-                        doc.ref.update({ from: username });
-                    });
-                    const chatsSnapshot2 = await db.collection('chats').where('to', '==', currentUser).get();
-                    chatsSnapshot2.forEach(doc => {
-                        doc.ref.update({ to: username });
-                    });
-                    
-                    // Update all stories
-                    const storiesSnapshot = await db.collection('stories').where('username', '==', currentUser).get();
-                    storiesSnapshot.forEach(doc => {
-                        doc.ref.update({ username: username });
-                    });
-                    
-                    // Update user document
-                    const oldUser = currentUser;
-                    const userData = (await userRef.get()).data();
-                    await db.collection('users').doc(username).set(userData);
-                    await db.collection('users').doc(oldUser).delete();
-                    
-                    // Update current user
-                    currentUser = username;
-                    localStorage.setItem('currentUser', username);
-                }
-                
-                if (password) {
-                    const user = auth.currentUser;
-                    if (user) await user.updatePassword(password);
-                    updates.password = password;
-                }
-                
-                if (avatarFile) {
-                    const ext = getFileExtension(avatarFile.name);
-                    const path = `avatars/${currentUser}.${ext}`;
-                    const url = await uploadFile(avatarFile, path);
-                    updates.avatar = url;
-                }
-                
-                if (Object.keys(updates).length > 0) {
-                    await db.collection('users').doc(currentUser).update(updates);
-                }
-                
-                alert('Profile updated successfully!');
-            } catch (e) {
-                alert('Error updating profile: ' + e.message);
-            }
-        }
-
-        // ============= UI RENDER FUNCTIONS =============
         function renderPosts() {
             const query = searchInput.value.toLowerCase();
             let filtered = posts.filter(p => {
@@ -1204,138 +983,24 @@
             });
         }
 
-        function renderStories() {
-            storiesContainer.innerHTML = '';
-            
-            const addDiv = document.createElement('div');
-            addDiv.className = 'story-circle';
-            addDiv.innerHTML = `
-                <button class="add-btn" onclick="document.getElementById('storyMedia').click();">+</button>
-                <span class="name">Add</span>
-                <input type="file" id="storyMedia" accept="image/*,video/*" style="display:none;" onchange="handleStoryUpload(event)">
-            `;
-            storiesContainer.appendChild(addDiv);
-            
-            stories.forEach(s => {
-                const div = document.createElement('div');
-                div.className = 'story-circle';
-                const avatarContent = users[s.username]?.avatar ? `<img src="${users[s.username].avatar}">` : `<div class="default-avatar">${s.username.charAt(0).toUpperCase()}</div>`;
-                div.innerHTML = `
-                    <div class="avatar" onclick="viewStory('${s.id}')">${avatarContent}</div>
-                    <span class="name">${s.username}</span>
-                `;
-                storiesContainer.appendChild(div);
-            });
-        }
-
-        async function handleStoryUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            await addStory(file);
-            event.target.value = '';
-        }
-
-        function viewStory(storyId) {
-            const story = stories.find(s => s.id === storyId);
-            if (!story) return;
-            
-            storyViewer.classList.add('active');
-            storyInfo.textContent = story.username;
-            storyProgressFill.style.width = '0%';
-            
-            if (story.mediaType === 'video') {
-                storyVideo.style.display = 'block';
-                storyImage.style.display = 'none';
-                storyVideo.src = story.media;
-                storyVideo.play();
-                storyVideo.addEventListener('timeupdate', function() {
-                    const progress = (this.currentTime / this.duration) * 100;
-                    storyProgressFill.style.width = progress + '%';
-                });
-            } else {
-                storyImage.style.display = 'block';
-                storyVideo.style.display = 'none';
-                storyImage.src = story.media;
-                let progress = 0;
-                if (storyInterval) clearInterval(storyInterval);
-                storyInterval = setInterval(() => {
-                    progress += 2;
-                    storyProgressFill.style.width = progress + '%';
-                    if (progress >= 100) { clearInterval(storyInterval); closeStory(); }
-                }, 100);
+        function renderExplore() {
+            exploreGrid.innerHTML = '';
+            const allPosts = posts.slice().reverse();
+            if (!allPosts.length) {
+                exploreGrid.innerHTML = '<p style="color:#888; text-align:center; grid-column:span 3; padding:40px;">No posts to explore.</p>';
+                return;
             }
-        }
-
-        function closeStory() {
-            storyViewer.classList.remove('active');
-            storyVideo.pause();
-            storyVideo.src = '';
-            storyImage.src = '';
-            storyProgressFill.style.width = '0%';
-            if (storyInterval) { clearInterval(storyInterval); storyInterval = null; }
-        }
-
-        function showDetail(postId) {
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
-            addView(postId);
-            
-            const related = posts.filter(p => p.id !== postId && p.username === post.username);
-            detailContainer.innerHTML = '';
-            
-            const div = document.createElement('div');
-            div.className = 'detail-item';
-            let mediaHTML = '';
-            if (post.mediaType === 'image' && post.media) mediaHTML = `<img src="${post.media}">`;
-            else if (post.mediaType === 'video' && post.media) mediaHTML = `<video src="${post.media}" controls></video>`;
-            else mediaHTML = `<div class="icon-big">📝</div>`;
-            
-            const liked = post.likes && post.likes.includes(currentUser);
-            const saved = post.saved && post.saved.includes(currentUser);
-            const isOwner = post.username === currentUser;
-            
-            div.innerHTML = `
-                ${mediaHTML}
-                <div class="info">
-                    <div class="username" style="cursor:pointer;" onclick="viewProfile('${post.username}')">${post.username}</div>
-                    <div class="text">${post.text || ''}</div>
-                    <div style="color:#666; font-size:12px; margin-top:4px;">👁️ ${post.views || 0} views</div>
-                </div>
-                <div class="detail-actions">
-                    <span class="view-count">👁️ ${post.views || 0}</span>
-                    <button class="like-btn-detail ${liked?'liked':''}" data-id="${post.id}">❤️ ${post.likes?post.likes.length:0}</button>
-                    <button class="comment-toggle-detail" data-id="${post.id}" onclick="openCommentsOverlay('${post.id}')">💬 ${post.comments?post.comments.length:0}</button>
-                    <button class="repost-btn-detail" data-id="${post.id}">🔁 ${post.reposts||0}</button>
-                    <button class="save-btn-detail ${saved?'saved':''}" data-id="${post.id}">🔖</button>
-                    ${isOwner?`<button class="delete-btn" onclick="deletePost('${post.id}')">🗑️</button>`:''}
-                    <button class="share-btn" onclick="openShareModal('${post.id}')">📤</button>
-                </div>
-                <h4 style="padding:12px;color:#888;">Related Posts</h4>
-                <div class="related-grid" style="padding:12px;">
-                    ${related.length ? related.map(r => `
-                        <div class="related-item" onclick="showDetail('${r.id}')">
-                            ${r.mediaType==='image'&&r.media?`<img src="${r.media}">`:`<div class="icon-big">${r.mediaType==='video'?'🎬':'📝'}</div>`}
-                        </div>
-                    `).join('') : '<p style="color:#888;grid-column:span 2;text-align:center;">No related posts</p>'}
-                </div>
-            `;
-            detailContainer.appendChild(div);
-            showPage('detailPage');
-            
-            document.querySelectorAll('.like-btn-detail').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    toggleLike(this.dataset.id);
-                });
-            });
-            document.querySelectorAll('.repost-btn-detail').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    addRepost(this.dataset.id);
-                });
-            });
-            document.querySelectorAll('.save-btn-detail').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    toggleSave(this.dataset.id);
-                });
+            allPosts.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'explore-item';
+                if (p.mediaType === 'image' && p.media) {
+                    div.innerHTML = `<img src="${p.media}" onclick="showDetail('${p.id}')">`;
+                } else if (p.mediaType === 'video' && p.media) {
+                    div.innerHTML = `<div class="icon-big" onclick="showDetail('${p.id}')">🎬</div>`;
+                } else {
+                    div.innerHTML = `<div class="icon-big" onclick="showDetail('${p.id}')">📝</div>`;
+                }
+                exploreGrid.appendChild(div);
             });
         }
 
@@ -1386,7 +1051,6 @@
                 container.appendChild(slide);
             });
             
-            // Video controls
             document.querySelectorAll('.play-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const slide = this.closest('.video-slide');
@@ -1439,117 +1103,6 @@
             });
         }
 
-        function renderExplore() {
-            exploreGrid.innerHTML = '';
-            const allPosts = posts.slice().reverse();
-            if (!allPosts.length) {
-                exploreGrid.innerHTML = '<p style="color:#888; text-align:center; grid-column:span 3; padding:40px;">No posts to explore.</p>';
-                return;
-            }
-            allPosts.forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'explore-item';
-                if (p.mediaType === 'image' && p.media) {
-                    div.innerHTML = `<img src="${p.media}" onclick="showDetail('${p.id}')">`;
-                } else if (p.mediaType === 'video' && p.media) {
-                    div.innerHTML = `<div class="icon-big" onclick="showDetail('${p.id}')">🎬</div>`;
-                } else {
-                    div.innerHTML = `<div class="icon-big" onclick="showDetail('${p.id}')">📝</div>`;
-                }
-                exploreGrid.appendChild(div);
-            });
-        }
-
-        function renderNotifications() {
-            notifList.innerHTML = '';
-            const userNotifs = notifications.filter(n => n.targetId === currentUser || n.from === currentUser);
-            if (!userNotifs.length) {
-                notifList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">No notifications yet.</p>';
-                return;
-            }
-            userNotifs.forEach(n => {
-                const div = document.createElement('div');
-                div.className = 'notification-item';
-                const avatar = users[n.from]?.avatar ? `<img src="${users[n.from].avatar}">` : n.from.charAt(0).toUpperCase();
-                let text = '';
-                if (n.type === 'like') text = `${n.from} liked your post.`;
-                else if (n.type === 'comment') text = `${n.from} commented on your post.`;
-                else if (n.type === 'follow') text = `${n.from} started following you.`;
-                else text = `${n.from} interacted with your post.`;
-                div.innerHTML = `
-                    <div class="avatar">${avatar}</div>
-                    <div class="text">${text}</div>
-                    <div class="time">${new Date(n.timestamp?.toMillis?.() || Date.now()).toLocaleDateString()}</div>
-                `;
-                notifList.appendChild(div);
-            });
-        }
-
-        function renderChatUserList() {
-            chatUserList.innerHTML = '';
-            chatConversation.style.display = 'none';
-            const following = users[currentUser]?.following || [];
-            if (!following.length) {
-                chatUserList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">Follow users to chat with them.</p>';
-                return;
-            }
-            following.forEach(u => {
-                const div = document.createElement('div');
-                div.className = 'chat-user-item';
-                const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
-                const lastMsg = chats.filter(c => (c.from === u && c.to === currentUser) || (c.from === currentUser && c.to === u)).pop();
-                div.innerHTML = `
-                    <div class="avatar">${avatar}</div>
-                    <div class="name">${u}</div>
-                    <div class="last-msg">${lastMsg ? (lastMsg.text || '').substring(0, 20) + ((lastMsg.text || '').length > 20 ? '...' : '') : 'No messages'}</div>
-                `;
-                div.addEventListener('click', () => openChatWithUser(u));
-                chatUserList.appendChild(div);
-            });
-        }
-
-        function openChatWithUser(username) {
-            selectedChatUser = username;
-            chatUserList.style.display = 'none';
-            chatConversation.style.display = 'flex';
-            renderPrivateChat(username);
-        }
-
-        function closeChat() {
-            selectedChatUser = null;
-            chatUserList.style.display = 'block';
-            chatConversation.style.display = 'none';
-        }
-
-        function renderPrivateChat(username) {
-            chatMessages.innerHTML = '';
-            const userChats = chats.filter(c => (c.from === currentUser && c.to === username) || (c.from === username && c.to === currentUser));
-            if (!userChats.length) {
-                chatMessages.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">No messages yet.</p>';
-                return;
-            }
-            userChats.forEach(c => {
-                const div = document.createElement('div');
-                div.className = `chat-message ${c.from === currentUser ? 'me' : 'other'}`;
-                const avatar = users[c.from]?.avatar ? `<img src="${users[c.from].avatar}">` : c.from.charAt(0).toUpperCase();
-                let mediaHTML = '';
-                if (c.media) {
-                    if (c.mediaType === 'image') mediaHTML = `<img src="${c.media}" style="max-width:200px; border-radius:8px; margin-top:4px;">`;
-                    else if (c.mediaType === 'video') mediaHTML = `<video src="${c.media}" controls style="max-width:200px; border-radius:8px; margin-top:4px;"></video>`;
-                }
-                div.innerHTML = `
-                    <div class="msg-avatar">${avatar}</div>
-                    <div class="msg-text">
-                        <div class="msg-username">${c.from}</div>
-                        <div class="msg-content">${c.text || ''}</div>
-                        ${mediaHTML}
-                    </div>
-                `;
-                chatMessages.appendChild(div);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
         function renderUserPosts() {
             let filtered = [];
             const userPosts = posts.filter(p => p.username === currentUser);
@@ -1591,49 +1144,85 @@
             });
         }
 
-        // ============= COMMENT OVERLAY =============
-        function openCommentsOverlay(postId) {
-            activeCommentPostId = postId;
+        function renderStories() {
+            storiesContainer.innerHTML = '';
+            const addDiv = document.createElement('div');
+            addDiv.className = 'story-circle';
+            addDiv.innerHTML = `
+                <button class="add-btn" onclick="document.getElementById('storyMedia').click();">+</button>
+                <span class="name">Add</span>
+                <input type="file" id="storyMedia" accept="image/*,video/*" style="display:none;" onchange="addStory(event)">
+            `;
+            storiesContainer.appendChild(addDiv);
+            
+            // Stories from Supabase would go here
+            // For now, just show placeholder
+        }
+
+        async function addStory(event) {
+            // Implementation for story upload to Supabase Storage
+            alert('Story upload coming soon with Supabase Storage!');
+            event.target.value = '';
+        }
+
+        function showDetail(postId) {
             const post = posts.find(p => p.id === postId);
             if (!post) return;
+            addView(postId);
             
-            commentsOverlayContent.innerHTML = '';
-            if (post.comments && post.comments.length) {
-                post.comments.slice().reverse().forEach(c => {
-                    const div = document.createElement('div');
-                    div.className = 'comment-item';
-                    const avatar = users[c.username]?.avatar ? `<img src="${users[c.username].avatar}" class="comment-avatar">` : `<div class="comment-avatar default">${c.username.charAt(0).toUpperCase()}</div>`;
-                    div.innerHTML = `
-                        <div class="comment-header">
-                            ${avatar}
-                            <span class="comment-username">${c.username}</span>
-                            <span style="font-size:10px;color:#666;">${new Date(c.timestamp || Date.now()).toLocaleDateString()}</span>
+            const related = posts.filter(p => p.id !== postId && p.username === post.username);
+            detailContainer.innerHTML = '';
+            
+            const div = document.createElement('div');
+            div.className = 'detail-item';
+            let mediaHTML = '';
+            if (post.mediaType === 'image' && post.media) mediaHTML = `<img src="${post.media}">`;
+            else if (post.mediaType === 'video' && post.media) mediaHTML = `<video src="${post.media}" controls></video>`;
+            else mediaHTML = `<div class="icon-big">📝</div>`;
+            
+            const liked = post.likes && post.likes.includes(currentUser);
+            const saved = post.saved && post.saved.includes(currentUser);
+            const isOwner = post.username === currentUser;
+            
+            div.innerHTML = `
+                ${mediaHTML}
+                <div class="info">
+                    <div class="username" style="cursor:pointer;" onclick="viewProfile('${post.username}')">${post.username}</div>
+                    <div class="text">${post.text || ''}</div>
+                    <div style="color:#666; font-size:12px; margin-top:4px;">👁️ ${post.views || 0} views</div>
+                </div>
+                <div class="detail-actions">
+                    <span class="view-count">👁️ ${post.views || 0}</span>
+                    <button class="like-btn-detail ${liked?'liked':''}" data-id="${post.id}">❤️ ${post.likes?post.likes.length:0}</button>
+                    <button class="comment-toggle-detail" data-id="${post.id}" onclick="openCommentsOverlay('${post.id}')">💬 ${post.comments?post.comments.length:0}</button>
+                    <button class="repost-btn-detail" data-id="${post.id}">🔁 ${post.reposts||0}</button>
+                    <button class="save-btn-detail ${saved?'saved':''}" data-id="${post.id}">🔖</button>
+                    ${isOwner?`<button class="delete-btn" onclick="deletePost('${post.id}')">🗑️</button>`:''}
+                    <button class="share-btn" onclick="openShareModal('${post.id}')">📤</button>
+                </div>
+                <h4 style="padding:12px;color:#888;">Related Posts</h4>
+                <div class="related-grid" style="padding:12px;">
+                    ${related.length ? related.map(r => `
+                        <div class="related-item" onclick="showDetail('${r.id}')">
+                            ${r.mediaType==='image'&&r.media?`<img src="${r.media}">`:`<div class="icon-big">${r.mediaType==='video'?'🎬':'📝'}</div>`}
                         </div>
-                        <div class="comment-text">${c.text}</div>
-                    `;
-                    commentsOverlayContent.appendChild(div);
-                });
-            } else {
-                commentsOverlayContent.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No comments yet.</p>';
-            }
-            commentsOverlay.classList.add('open');
+                    `).join('') : '<p style="color:#888;grid-column:span 2;text-align:center;">No related posts</p>'}
+                </div>
+            `;
+            detailContainer.appendChild(div);
+            showPage('detailPage');
+            
+            document.querySelectorAll('.like-btn-detail').forEach(btn => {
+                btn.addEventListener('click', function() { toggleLike(this.dataset.id); });
+            });
+            document.querySelectorAll('.repost-btn-detail').forEach(btn => {
+                btn.addEventListener('click', function() { addRepost(this.dataset.id); });
+            });
+            document.querySelectorAll('.save-btn-detail').forEach(btn => {
+                btn.addEventListener('click', function() { toggleSave(this.dataset.id); });
+            });
         }
 
-        function closeCommentsOverlay() {
-            commentsOverlay.classList.remove('open');
-            activeCommentPostId = null;
-        }
-
-        commentOverlaySend.addEventListener('click', async () => {
-            if (!activeCommentPostId) return;
-            const text = commentOverlayInput.value.trim();
-            if (!text) return;
-            await addComment(activeCommentPostId, text);
-            commentOverlayInput.value = '';
-            openCommentsOverlay(activeCommentPostId);
-        });
-
-        // ============= PROFILE VIEWER =============
         function viewProfile(username) {
             if (!users[username]) { alert('User not found'); return; }
             viewingUser = username;
@@ -1687,12 +1276,47 @@
             showPage('home');
         }
 
-        async function toggleFollow() {
-            if (!viewingUser || viewingUser === currentUser) return;
-            await followUser(viewingUser);
+        function openCommentsOverlay(postId) {
+            activeCommentPostId = postId;
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+            
+            commentsOverlayContent.innerHTML = '';
+            if (post.comments && post.comments.length) {
+                post.comments.slice().reverse().forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'comment-item';
+                    const avatar = users[c.username]?.avatar ? `<img src="${users[c.username].avatar}" class="comment-avatar">` : `<div class="comment-avatar default">${c.username.charAt(0).toUpperCase()}</div>`;
+                    div.innerHTML = `
+                        <div class="comment-header">
+                            ${avatar}
+                            <span class="comment-username">${c.username}</span>
+                            <span style="font-size:10px;color:#666;">${new Date(c.timestamp || Date.now()).toLocaleDateString()}</span>
+                        </div>
+                        <div class="comment-text">${c.text}</div>
+                    `;
+                    commentsOverlayContent.appendChild(div);
+                });
+            } else {
+                commentsOverlayContent.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No comments yet.</p>';
+            }
+            commentsOverlay.classList.add('open');
         }
 
-        // ============= FOLLOW MODAL =============
+        function closeCommentsOverlay() {
+            commentsOverlay.classList.remove('open');
+            activeCommentPostId = null;
+        }
+
+        commentOverlaySend.addEventListener('click', async () => {
+            if (!activeCommentPostId) return;
+            const text = commentOverlayInput.value.trim();
+            if (!text) return;
+            await addComment(activeCommentPostId, text);
+            commentOverlayInput.value = '';
+            openCommentsOverlay(activeCommentPostId);
+        });
+
         function openFollowModal(type) {
             followModalType = type;
             const targetUser = viewingUser || currentUser;
@@ -1726,12 +1350,8 @@
             followModal.classList.remove('active');
         }
 
-        // ============= SHARE MODAL =============
         function openShareModal(postId) {
             sharePostId = postId;
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
-            
             shareUserList.innerHTML = '';
             const following = users[currentUser]?.following || [];
             if (!following.length) {
@@ -1743,7 +1363,10 @@
                 div.className = 'user-item';
                 const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
                 div.innerHTML = `<div class="avatar">${avatar}</div><span>${u}</span>`;
-                div.addEventListener('click', () => sharePostWithUser(postId, u));
+                div.addEventListener('click', () => {
+                    alert('🔜 Share feature coming soon!');
+                    closeShareModal();
+                });
                 shareUserList.appendChild(div);
             });
             shareModal.classList.add('active');
@@ -1754,24 +1377,10 @@
             sharePostId = null;
         }
 
-        async function sharePostWithUser(postId, username) {
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
-            
-            let message = `📤 Post from ${post.username}: ${post.text || '📷'}`;
-            if (post.mediaType === 'image') message = `📤 Post from ${post.username}: 📷 ${post.text || ''}`;
-            else if (post.mediaType === 'video') message = `📤 Post from ${post.username}: 🎬 ${post.text || ''}`;
-            
-            await sendMessage(username, message);
-            alert('Post shared with ' + username + '!');
-            closeShareModal();
-        }
-
-        // ============= USER SEARCH =============
         function openUserSearch() {
             userSearchOverlay.classList.add('active');
             userSearchInput.value = '';
-            userSearchResults.innerHTML = '';
+            userSearchResults.innerHTML = '<div class="no-search-results">Type to search for users...</div>';
             userSearchInput.focus();
         }
 
@@ -1841,66 +1450,34 @@
             if (e.key === 'Escape') closeUserSearch();
         });
 
-        // ============= SETTINGS =============
-        function toggleAccountEdit() {
-            const el = document.getElementById('accountEdit');
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
-            document.getElementById('editUsername').value = currentUser;
-            document.getElementById('editPassword').value = '';
-        }
-
-        async function saveAccountSettings() {
-            const newUsername = document.getElementById('editUsername').value.trim();
-            const newPassword = document.getElementById('editPassword').value.trim();
-            if (!newUsername) return alert('Username cannot be empty');
-            
-            // Handle avatar if any
-            const avatarFile = document.getElementById('avatarInput').files[0];
-            
-            await updateProfile(newUsername, newPassword, avatarFile);
-            document.getElementById('accountEdit').style.display = 'none';
-        }
-
-        async function deleteAccount() {
-            if (!confirm('Delete your account? This cannot be undone!')) return;
-            try {
-                const user = auth.currentUser;
-                if (user) await user.delete();
-                await db.collection('users').doc(currentUser).delete();
-                currentUser = null;
-                localStorage.removeItem('currentUser');
-                updateUI();
-            } catch (e) {
-                alert('Error deleting account: ' + e.message);
+        function renderChatUserList() {
+            chatUserList.innerHTML = '';
+            chatConversation.style.display = 'none';
+            const following = users[currentUser]?.following || [];
+            if (!following.length) {
+                chatUserList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">Follow users to chat with them.</p>';
+                return;
             }
+            following.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'chat-user-item';
+                const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
+                div.innerHTML = `
+                    <div class="avatar">${avatar}</div>
+                    <div class="name">${u}</div>
+                    <div class="last-msg">🔜 Chat coming soon</div>
+                `;
+                div.addEventListener('click', () => {
+                    alert('🔜 Chat feature coming soon!');
+                });
+                chatUserList.appendChild(div);
+            });
         }
 
-        // ============= THEME =============
-        function setTheme(theme) {
-            const body = document.body;
-            const darkBtn = document.getElementById('themeDark');
-            const lightBtn = document.getElementById('themeLight');
-            if (theme === 'dark') {
-                body.style.background = '#000';
-                body.style.color = '#fff';
-                document.querySelectorAll('.page').forEach(p => p.style.background = '#111');
-                darkBtn.classList.add('active');
-                lightBtn.classList.remove('active');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                body.style.background = '#f5f5f5';
-                body.style.color = '#111';
-                document.querySelectorAll('.page').forEach(p => p.style.background = '#fff');
-                lightBtn.classList.add('active');
-                darkBtn.classList.remove('active');
-                localStorage.setItem('theme', 'light');
-            }
+        function renderNotifications() {
+            notifList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">🔜 Notifications coming soon!</p>';
         }
 
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        setTheme(savedTheme);
-
-        // ============= SEARCH =============
         function performSearch() {
             const query = settingsSearch.value.trim().toLowerCase();
             if (!query) {
@@ -1951,7 +1528,139 @@
             }
         }
 
+        function switchProfileTab(tab) {
+            profileTab = tab;
+            document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.profile-tab[data-tab="${tab}"]`)?.classList.add('active');
+            renderUserPosts();
+        }
+
+        function toggleAccountEdit() {
+            const el = document.getElementById('accountEdit');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('editUsername').value = currentUser;
+            document.getElementById('editPassword').value = '';
+        }
+
+        async function saveAccountSettings() {
+            const newUsername = document.getElementById('editUsername').value.trim();
+            const newPassword = document.getElementById('editPassword').value.trim();
+            
+            if (!newUsername) return alert('Username cannot be empty');
+            
+            try {
+                if (newUsername !== currentUser) {
+                    // Check if username exists
+                    const { data } = await supabase
+                        .from('users')
+                        .select('username')
+                        .eq('username', newUsername);
+                    
+                    if (data && data.length > 0) {
+                        alert('Username already taken!');
+                        return;
+                    }
+                    
+                    // Update posts
+                    await supabase
+                        .from('posts')
+                        .update({ username: newUsername })
+                        .eq('username', currentUser);
+                    
+                    // Update user
+                    await supabase
+                        .from('users')
+                        .update({ username: newUsername })
+                        .eq('username', currentUser);
+                    
+                    // If password is provided, update it
+                    if (newPassword) {
+                        await supabase
+                            .from('users')
+                            .update({ password: newPassword })
+                            .eq('username', newUsername);
+                    }
+                    
+                    currentUser = newUsername;
+                    localStorage.setItem('currentUser', currentUser);
+                } else if (newPassword) {
+                    await supabase
+                        .from('users')
+                        .update({ password: newPassword })
+                        .eq('username', currentUser);
+                }
+                
+                await loadUsers();
+                await loadPosts();
+                updateUI();
+                alert('✅ Profile updated successfully!');
+                document.getElementById('accountEdit').style.display = 'none';
+            } catch (e) {
+                alert('❌ Error updating profile: ' + e.message);
+            }
+        }
+
+        async function deleteAccount() {
+            if (!confirm('Delete your account? This cannot be undone!')) return;
+            try {
+                await supabase
+                    .from('users')
+                    .delete()
+                    .eq('username', currentUser);
+                
+                await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('username', currentUser);
+                
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                await loadUsers();
+                await loadPosts();
+                updateUI();
+                alert('Account deleted.');
+            } catch (e) {
+                alert('Error deleting account: ' + e.message);
+            }
+        }
+
+        function closeStory() {
+            storyViewer.classList.remove('active');
+            if (storyVideo) {
+                storyVideo.pause();
+                storyVideo.src = '';
+            }
+            storyImage.src = '';
+            storyProgressFill.style.width = '0%';
+            if (storyInterval) { clearInterval(storyInterval); storyInterval = null; }
+        }
+
+        function setTheme(theme) {
+            const body = document.body;
+            const darkBtn = document.getElementById('themeDark');
+            const lightBtn = document.getElementById('themeLight');
+            if (theme === 'dark') {
+                body.style.background = '#000';
+                body.style.color = '#fff';
+                document.querySelectorAll('.page').forEach(p => p.style.background = '#111');
+                darkBtn.classList.add('active');
+                lightBtn.classList.remove('active');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.style.background = '#f5f5f5';
+                body.style.color = '#111';
+                document.querySelectorAll('.page').forEach(p => p.style.background = '#fff');
+                lightBtn.classList.add('active');
+                darkBtn.classList.remove('active');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
         // ============= NAVIGATION =============
+
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -1988,16 +1697,40 @@
 
         searchInput.addEventListener('input', renderPosts);
 
-        // ============= PROFILE AVATAR =============
+        function switchMode() {
+            isLogin = !isLogin;
+            loginBtn.style.display = isLogin ? 'block' : 'none';
+            registerBtn.style.display = isLogin ? 'none' : 'block';
+            switchAuth.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Login";
+        }
+        switchAuth.addEventListener('click', switchMode);
+
         profileAvatar.addEventListener('click', () => avatarInput.click());
         avatarInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            await updateProfile(currentUser, null, file);
+            
+            try {
+                const reader = new FileReader();
+                const avatarData = await new Promise((resolve) => {
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+                
+                await supabase
+                    .from('users')
+                    .update({ avatar: avatarData })
+                    .eq('username', currentUser);
+                
+                await loadUsers();
+                profileAvatar.innerHTML = `<img src="${avatarData}">`;
+                alert('✅ Avatar updated!');
+            } catch (err) {
+                alert('Error updating avatar: ' + err.message);
+            }
             e.target.value = '';
         });
 
-        // ============= INIT =============
         function updateUI() {
             if (currentUser && users[currentUser]) {
                 authPage.classList.remove('active');
@@ -2015,12 +1748,26 @@
             }
         }
 
-        // Check for existing session
-        if (localStorage.getItem('currentUser')) {
-            // Auth listener will handle it
+        // ============= INIT =============
+        async function init() {
+            await loadUsers();
+            await loadPosts();
+            
+            if (localStorage.getItem('currentUser')) {
+                currentUser = localStorage.getItem('currentUser');
+                if (users[currentUser]) {
+                    updateUI();
+                } else {
+                    currentUser = null;
+                    localStorage.removeItem('currentUser');
+                    updateUI();
+                }
+            }
+            
+            switchMode();
         }
 
-        switchMode();
+        init();
     </script>
 </body>
     </html>
