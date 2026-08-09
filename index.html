@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Social App</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background: #000; color: #fff; height: 100vh; display: flex; flex-direction: column; }
@@ -201,28 +200,10 @@
         .notification-item .avatar img { width: 100%; height: 100%; object-fit: cover; }
         .notification-item .text { flex: 1; color: #ccc; font-size: 14px; }
         .notification-item .time { color: #666; font-size: 11px; }
-        .user-search-btn { background: #222; border: none; color: #fff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
-        .user-search-btn:hover { background: #333; }
-        #userSearchOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); z-index: 5000; display: none; flex-direction: column; padding: 20px; }
-        #userSearchOverlay.active { display: flex; }
-        #userSearchOverlay .search-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-        #userSearchOverlay .search-header input { flex: 1; padding: 12px 16px; border-radius: 25px; border: none; background: #222; color: #fff; font-size: 16px; outline: none; }
-        #userSearchOverlay .search-header .close-search { background: #333; border: none; color: #fff; font-size: 24px; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; }
-        #userSearchResults { flex: 1; overflow-y: auto; padding: 8px 0; }
-        .user-search-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px; cursor: pointer; color: #fff; transition: background 0.2s; }
-        .user-search-item:hover { background: #1a1a2e; }
-        .user-search-item .avatar { width: 48px; height: 48px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; }
-        .user-search-item .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .user-search-item .info { flex: 1; }
-        .user-search-item .info .username { font-weight: bold; font-size: 16px; }
-        .user-search-item .info .bio { color: #888; font-size: 13px; }
-        .user-search-item .follow-badge { background: #ff0050; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-        .user-search-item .follow-badge.following { background: #333; }
-        .no-search-results { color: #888; text-align: center; padding: 40px 20px; font-size: 16px; }
-        .loading-spinner { text-align: center; padding: 40px; color: #888; font-size: 20px; }
     </style>
 </head>
 <body>
+    <!-- Auth -->
     <div id="auth" class="page active">
         <div class="auth-box">
             <h2 style="text-align:center; margin-bottom:20px;">Welcome</h2>
@@ -233,303 +214,621 @@
             <div class="switch" id="switchAuth">Don't have an account? Register</div>
         </div>
     </div>
+
+    <!-- Home -->
     <div id="home" class="page">
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 16px 0;">
-            <h2 style="font-size:20px;">Social</h2>
-            <button class="user-search-btn" onclick="openUserSearch()">👤 Search Users</button>
-        </div>
         <div class="stories-row" id="storiesContainer"></div>
         <div class="search-box"><span>🔍</span><input type="text" id="searchInput" placeholder="Search posts or users..."></div>
         <div class="tabs"><div class="tab active" data-tab="forYou">For You</div><div class="tab" data-tab="following">Following</div></div>
         <div class="masonry" id="postsContainer"></div>
     </div>
-    <div id="storyViewer"><button class="close" onclick="closeStory()">✕</button><div class="story-progress"><div class="progress-fill" id="storyProgressFill"></div></div><img class="story-content" id="storyImage" style="display:none;"><video class="story-content" id="storyVideo" style="display:none;" controls autoplay></video><div class="story-info" id="storyInfo"></div></div>
-    <div id="detailPage" class="page"><button class="back-btn" onclick="showPage('home')">← Back</button><div id="detailContainer"></div></div>
-    <div id="video" class="page" id="videoPage"><div id="videoContainer"></div></div>
-    <div id="explore" class="page"><h2 style="padding: 16px;">🔍 Explore</h2><div class="explore-grid" id="exploreGrid"></div></div>
-    <div id="notifications" class="page"><h2 style="padding: 16px;">🔔 Notifications</h2><div id="notifList"></div></div>
-    <div id="addPost" class="page"><h2>Create Post</h2><input type="text" id="postUsername" placeholder="Your username" style="padding:12px; border-radius:8px; border:none; background:#222; color:#fff; margin-bottom:12px;"><textarea id="postText" placeholder="What's on your mind? (Optional)"></textarea><div class="media-type"><label><input type="radio" name="mediaType" value="image" checked> Image</label><label><input type="radio" name="mediaType" value="video"> Video</label></div><button class="file-btn" onclick="document.getElementById('postMedia').click();">📁 Select from Gallery</button><input type="file" id="postMedia" accept="image/*,video/*" style="display:none;"><button id="submitPost">Post</button></div>
-    <div id="chat" class="page"><h2 style="padding:0 16px; margin-top:16px;">💬 Chat</h2><div id="chatUserList"></div><div id="chatConversation"><button class="back-btn" onclick="closeChat()">← Back</button><div class="chat-messages" id="chatMessages"></div><div class="chat-input"><input type="text" id="chatInput" placeholder="Type a message..."><button class="file-btn-chat" onclick="document.getElementById('chatMediaInput').click();">📎</button><input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;" onchange="sendChatMedia(event)"><button id="sendChat">Send</button></div></div></div>
-    <div id="profile" class="page"><div class="profile-header"><div class="profile-avatar" id="profileAvatar">👤</div><h2 id="profileName">User</h2><div class="profile-stats"><div onclick="openFollowModal('followers')"><div class="num" id="followersCount">0</div><div class="label">Followers</div></div><div onclick="openFollowModal('following')"><div class="num" id="followingCount">0</div><div class="label">Following</div></div><div><div class="num" id="postCount">0</div><div class="label">Posts</div></div></div><input type="file" id="avatarInput" accept="image/*" style="display:none;"><button id="logoutBtn" style="background:#333; color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; margin-top:8px;">Logout</button></div><div class="profile-tabs"><span class="profile-tab active" data-tab="myposts" onclick="switchProfileTab('myposts')">My Posts</span><span class="profile-tab" data-tab="liked" onclick="switchProfileTab('liked')">❤️ Liked</span><span class="profile-tab" data-tab="saved" onclick="switchProfileTab('saved')">🔖 Saved</span><span class="profile-tab" data-tab="reposted" onclick="switchProfileTab('reposted')">🔁 Reposted</span></div><div class="masonry" id="userPosts"></div></div>
-    <div id="settings" class="page"><div style="padding: 16px;"><h2 style="margin-bottom: 16px;">⚙️ Settings</h2><div class="settings-card"><h4>Account</h4><div class="settings-item" onclick="toggleAccountEdit()"><span class="label">Edit Profile</span><span class="arrow">›</span></div><div id="accountEdit" style="display:none; margin-top:12px;"><input type="text" id="editUsername" class="settings-input" placeholder="New username"><input type="password" id="editPassword" class="settings-input" placeholder="New password"><button class="settings-btn" onclick="saveAccountSettings()">Save Changes</button><button class="settings-btn danger" onclick="deleteAccount()">Delete Account</button></div></div><div class="settings-card"><h4>Theme</h4><div class="theme-toggle"><button id="themeDark" class="active" onclick="setTheme('dark')">🌙 Dark</button><button id="themeLight" onclick="setTheme('light')">☀️ Light</button></div></div><div class="settings-card"><h4>🔍 Search</h4><input type="text" id="searchQuery" class="settings-input" placeholder="Search posts, users, #hashtags..." oninput="performSearch()"><div id="searchResults" class="search-results" style="display:none;"></div></div></div></div>
-    <div class="follow-modal" id="followModal"><div class="follow-modal-content"><h3 id="followModalTitle">Followers</h3><div id="followList"></div><button class="close-modal" onclick="closeFollowModal()">Close</button></div></div>
-    <div id="profileViewer" class="page"><button class="back-btn" onclick="closeProfileViewer()">← Back</button><div class="profile-header"><div class="profile-avatar" id="viewerAvatar">👤</div><h2 id="viewerName">User</h2><div class="profile-stats"><div onclick="openFollowModal('followers')"><div class="num" id="viewerFollowersCount">0</div><div class="label">Followers</div></div><div onclick="openFollowModal('following')"><div class="num" id="viewerFollowingCount">0</div><div class="label">Following</div></div></div><button class="follow-btn" id="viewerFollowBtn" onclick="toggleFollow()">Follow</button></div><h3 style="padding:0 16px;">Posts</h3><div class="masonry" id="viewerPosts"></div></div>
-    <div class="share-modal" id="shareModal"><div class="share-modal-content"><h3>Share with</h3><div id="shareUserList"></div><button class="close-modal" onclick="closeShareModal()">Close</button></div></div>
-    <div id="userSearchOverlay"><div class="search-header"><input type="text" id="userSearchInput" placeholder="Search for users..." oninput="performUserSearch()"><button class="close-search" onclick="closeUserSearch()">✕</button></div><div id="userSearchResults"></div></div>
-    <div class="bottom-nav" id="mainNav" style="display:none;"><div class="nav-item active" data-page="home"><span class="icon">🏠</span><span>Home</span></div><div class="nav-item" data-page="explore"><span class="icon">🔍</span><span>Explore</span></div><div class="nav-item add-btn" data-page="addPost"><span class="icon">➕</span></div><div class="nav-item" data-page="video"><span class="icon">🎬</span><span>Video</span></div><div class="nav-item" data-page="chat"><span class="icon">💬</span><span>Chat</span></div><div class="nav-item" data-page="notifications"><span class="icon">🔔</span><span>Notif</span></div><div class="nav-item" data-page="profile"><span class="icon">👤</span><span>Profile</span></div><div class="nav-item" data-page="settings"><span class="icon">⚙️</span><span>Settings</span></div></div>
-    <div class="comments-overlay" id="commentsOverlay"><div class="handle"></div><button class="close-btn" onclick="closeCommentsOverlay()">✕</button><div id="commentsOverlayContent"></div><div class="comment-input-area"><input type="text" id="commentOverlayInput" placeholder="Add a comment..."><button id="commentOverlaySend">Post</button></div></div>
-    <script>
-        const SUPABASE_URL = 'https://ynsrwogjstrgfbqyvvhq.supabase.co';
-        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_aeE5Kjw9B5wlpQ0rTLrKrw_wDWJ1yOS';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-        let currentUser = localStorage.getItem('currentUser') || null;
-        let posts = [];
-        let users = {};
-        let currentTab = 'forYou';
-        let viewingUser = null;
-        let profileTab = 'myposts';
-        let isLogin = true;
-        let activeCommentPostId = null;
 
-        async function loadPosts() {
+    <!-- Story Viewer -->
+    <div id="storyViewer"><button class="close" onclick="closeStory()">✕</button><div class="story-progress"><div class="progress-fill" id="storyProgressFill"></div></div><img class="story-content" id="storyImage" style="display:none;"><video class="story-content" id="storyVideo" style="display:none;" controls autoplay></video><div class="story-info" id="storyInfo"></div></div>
+
+    <!-- Detail Page -->
+    <div id="detailPage" class="page"><button class="back-btn" onclick="showPage('home')">← Back</button><div id="detailContainer"></div></div>
+
+    <!-- Video Page -->
+    <div id="video" class="page" id="videoPage"><div id="videoContainer"></div></div>
+
+    <!-- Explore Page -->
+    <div id="explore" class="page">
+        <h2 style="padding: 16px;">🔍 Explore</h2>
+        <div class="explore-grid" id="exploreGrid"></div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications" class="page">
+        <h2 style="padding: 16px;">🔔 Notifications</h2>
+        <div id="notifList"></div>
+    </div>
+
+    <!-- Add Post -->
+    <div id="addPost" class="page">
+        <h2>Create Post</h2>
+        <input type="text" id="postUsername" placeholder="Your username" style="padding:12px; border-radius:8px; border:none; background:#222; color:#fff; margin-bottom:12px;">
+        <textarea id="postText" placeholder="What's on your mind? (Optional)"></textarea>
+        <div class="media-type"><label><input type="radio" name="mediaType" value="image" checked> Image</label><label><input type="radio" name="mediaType" value="video"> Video</label></div>
+        <button class="file-btn" onclick="document.getElementById('postMedia').click();">📁 Select from Gallery</button>
+        <input type="file" id="postMedia" accept="image/*,video/*" style="display:none;">
+        <button id="submitPost">Post</button>
+    </div>
+
+    <!-- Chat -->
+    <div id="chat" class="page">
+        <h2 style="padding:0 16px; margin-top:16px;">💬 Chat</h2>
+        <div id="chatUserList"></div>
+        <div id="chatConversation">
+            <button class="back-btn" onclick="closeChat()">← Back</button>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type a message...">
+                <button class="file-btn-chat" onclick="document.getElementById('chatMediaInput').click();">📎</button>
+                <input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;" onchange="sendChatMedia(event)">
+                <button id="sendChat">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile -->
+    <div id="profile" class="page">
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">👤</div>
+            <h2 id="profileName">User</h2>
+            <div class="profile-stats">
+                <div onclick="openFollowModal('followers')"><div class="num" id="followersCount">0</div><div class="label">Followers</div></div>
+                <div onclick="openFollowModal('following')"><div class="num" id="followingCount">0</div><div class="label">Following</div></div>
+                <div><div class="num" id="postCount">0</div><div class="label">Posts</div></div>
+            </div>
+            <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+            <button id="logoutBtn" style="background:#333; color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; margin-top:8px;">Logout</button>
+        </div>
+        <div class="profile-tabs">
+            <span class="profile-tab active" data-tab="myposts" onclick="switchProfileTab('myposts')">My Posts</span>
+            <span class="profile-tab" data-tab="liked" onclick="switchProfileTab('liked')">❤️ Liked</span>
+            <span class="profile-tab" data-tab="saved" onclick="switchProfileTab('saved')">🔖 Saved</span>
+            <span class="profile-tab" data-tab="reposted" onclick="switchProfileTab('reposted')">🔁 Reposted</span>
+        </div>
+        <div class="masonry" id="userPosts"></div>
+    </div>
+
+    <!-- Settings -->
+    <div id="settings" class="page">
+        <div style="padding: 16px;">
+            <h2 style="margin-bottom: 16px;">⚙️ Settings</h2>
+            <div class="settings-card">
+                <h4>Account</h4>
+                <div class="settings-item" onclick="toggleAccountEdit()">
+                    <span class="label">Edit Profile</span>
+                    <span class="arrow">›</span>
+                </div>
+                <div id="accountEdit" style="display:none; margin-top:12px;">
+                    <input type="text" id="editUsername" class="settings-input" placeholder="New username">
+                    <input type="password" id="editPassword" class="settings-input" placeholder="New password">
+                    <button class="settings-btn" onclick="saveAccountSettings()">Save Changes</button>
+                    <button class="settings-btn danger" onclick="deleteAccount()">Delete Account</button>
+                </div>
+            </div>
+            <div class="settings-card">
+                <h4>Theme</h4>
+                <div class="theme-toggle">
+                    <button id="themeDark" class="active" onclick="setTheme('dark')">🌙 Dark</button>
+                    <button id="themeLight" onclick="setTheme('light')">☀️ Light</button>
+                </div>
+            </div>
+            <div class="settings-card">
+                <h4>🔍 Search</h4>
+                <input type="text" id="searchQuery" class="settings-input" placeholder="Search posts, users, #hashtags..." oninput="performSearch()">
+                <div id="searchResults" class="search-results" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Follow Modal -->
+    <div class="follow-modal" id="followModal">
+        <div class="follow-modal-content">
+            <h3 id="followModalTitle">Followers</h3>
+            <div id="followList"></div>
+            <button class="close-modal" onclick="closeFollowModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Profile Viewer -->
+    <div id="profileViewer" class="page">
+        <button class="back-btn" onclick="closeProfileViewer()">← Back</button>
+        <div class="profile-header">
+            <div class="profile-avatar" id="viewerAvatar">👤</div>
+            <h2 id="viewerName">User</h2>
+            <div class="profile-stats">
+                <div onclick="openFollowModal('followers')"><div class="num" id="viewerFollowersCount">0</div><div class="label">Followers</div></div>
+                <div onclick="openFollowModal('following')"><div class="num" id="viewerFollowingCount">0</div><div class="label">Following</div></div>
+            </div>
+            <button class="follow-btn" id="viewerFollowBtn" onclick="toggleFollow()">Follow</button>
+        </div>
+        <h3 style="padding:0 16px;">Posts</h3>
+        <div class="masonry" id="viewerPosts"></div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="share-modal" id="shareModal">
+        <div class="share-modal-content">
+            <h3>Share with</h3>
+            <div id="shareUserList"></div>
+            <button class="close-modal" onclick="closeShareModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav" id="mainNav" style="display:none;">
+        <div class="nav-item active" data-page="home"><span class="icon">🏠</span><span>Home</span></div>
+        <div class="nav-item" data-page="explore"><span class="icon">🔍</span><span>Explore</span></div>
+        <div class="nav-item add-btn" data-page="addPost"><span class="icon">➕</span></div>
+        <div class="nav-item" data-page="video"><span class="icon">🎬</span><span>Video</span></div>
+        <div class="nav-item" data-page="chat"><span class="icon">💬</span><span>Chat</span></div>
+        <div class="nav-item" data-page="notifications"><span class="icon">🔔</span><span>Notif</span></div>
+        <div class="nav-item" data-page="profile"><span class="icon">👤</span><span>Profile</span></div>
+        <div class="nav-item" data-page="settings"><span class="icon">⚙️</span><span>Settings</span></div>
+    </div>
+
+    <!-- Comments Overlay -->
+    <div class="comments-overlay" id="commentsOverlay">
+        <div class="handle"></div>
+        <button class="close-btn" onclick="closeCommentsOverlay()">✕</button>
+        <div id="commentsOverlayContent"></div>
+        <div class="comment-input-area">
+            <input type="text" id="commentOverlayInput" placeholder="Add a comment...">
+            <button id="commentOverlaySend">Post</button>
+        </div>
+    </div>
+
+    <script>
+        // ============= JSONBIN CONFIG =============
+        const BIN_ID = '6a790240f5f4af5e29000367';
+        const API_KEY = '$2a$10$YJqHMZfdvZ/oBZOz6EoWgexdGklYtIB8Hf2VhmRSujXeWTo4xnGfG';
+
+        // ============= STATE =============
+        let users = JSON.parse(localStorage.getItem('users')) || {};
+        let posts = [];
+        let chats = JSON.parse(localStorage.getItem('chats')) || [];
+        let stories = JSON.parse(localStorage.getItem('stories')) || [];
+        let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+        let currentUser = localStorage.getItem('currentUser') || null;
+        let currentTab = 'forYou';
+        let videoFiles = {};
+        let chatMediaFiles = {};
+        let activeCommentPostId = null;
+        let viewingUser = null;
+        let sharePostId = null;
+        let profileTab = 'myposts';
+        let followModalType = 'followers';
+        let selectedChatUser = null;
+
+        const authPage = document.getElementById('auth');
+        const nav = document.getElementById('mainNav');
+        const postsContainer = document.getElementById('postsContainer');
+        const searchInput = document.getElementById('searchInput');
+        const tabs = document.querySelectorAll('.tab');
+        const videoContainer = document.getElementById('videoContainer');
+        const detailContainer = document.getElementById('detailContainer');
+        const storiesContainer = document.getElementById('storiesContainer');
+        const storyViewer = document.getElementById('storyViewer');
+        const storyImage = document.getElementById('storyImage');
+        const storyVideo = document.getElementById('storyVideo');
+        const storyInfo = document.getElementById('storyInfo');
+        const storyProgressFill = document.getElementById('storyProgressFill');
+        const commentsOverlay = document.getElementById('commentsOverlay');
+        const commentsOverlayContent = document.getElementById('commentsOverlayContent');
+        const commentOverlayInput = document.getElementById('commentOverlayInput');
+        const commentOverlaySend = document.getElementById('commentOverlaySend');
+        const profileViewer = document.getElementById('profileViewer');
+        const viewerAvatar = document.getElementById('viewerAvatar');
+        const viewerName = document.getElementById('viewerName');
+        const viewerPosts = document.getElementById('viewerPosts');
+        const viewerFollowBtn = document.getElementById('viewerFollowBtn');
+        const viewerFollowersCount = document.getElementById('viewerFollowersCount');
+        const viewerFollowingCount = document.getElementById('viewerFollowingCount');
+        const userPostsDiv = document.getElementById('userPosts');
+        const postCount = document.getElementById('postCount');
+        const followersCount = document.getElementById('followersCount');
+        const followingCount = document.getElementById('followingCount');
+        const followModal = document.getElementById('followModal');
+        const followList = document.getElementById('followList');
+        const followModalTitle = document.getElementById('followModalTitle');
+        const shareModal = document.getElementById('shareModal');
+        const shareUserList = document.getElementById('shareUserList');
+        const chatUserList = document.getElementById('chatUserList');
+        const chatConversation = document.getElementById('chatConversation');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChat');
+        const chatMediaInput = document.getElementById('chatMediaInput');
+        const settingsSearch = document.getElementById('searchQuery');
+        const searchResults = document.getElementById('searchResults');
+        const exploreGrid = document.getElementById('exploreGrid');
+        const notifList = document.getElementById('notifList');
+
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const switchAuth = document.getElementById('switchAuth');
+
+        const submitPost = document.getElementById('submitPost');
+        const postText = document.getElementById('postText');
+        const postMedia = document.getElementById('postMedia');
+        const postUsername = document.getElementById('postUsername');
+
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileName = document.getElementById('profileName');
+        const avatarInput = document.getElementById('avatarInput');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        let isLogin = true;
+        let storyInterval = null;
+
+        // ============= JSONBIN FUNCTIONS =============
+        async function loadPostsFromJSONBin() {
             try {
-                const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                posts = data || [];
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    headers: { 'X-Access-Key': API_KEY }
+                });
+                const data = await res.json();
+                posts = data.record.posts || [];
                 renderPosts();
                 renderExplore();
                 renderUserPosts();
                 if (viewingUser) viewProfile(viewingUser);
-            } catch (e) { console.error('Error loading posts:', e); }
+            } catch (e) {
+                console.error('Error loading posts from JSONBin:', e);
+                posts = [];
+            }
         }
 
-        async function loadUsers() {
+        async function savePostsToJSONBin() {
             try {
-                const { data, error } = await supabase.from('users').select('*');
-                if (error) throw error;
-                users = {};
-                data.forEach(u => { users[u.username] = u; });
-                updateUI();
-            } catch (e) { console.error('Error loading users:', e); }
-        }
-
-        registerBtn.addEventListener('click', async () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            if (!username || !password) { alert('Please fill all fields'); return; }
-            if (username.length < 3) { alert('Username must be at least 3 characters'); return; }
-            if (password.length < 6) { alert('Password must be at least 6 characters'); return; }
-            try {
-                registerBtn.textContent = '⏳ Registering...';
-                registerBtn.disabled = true;
-                const { data: existing } = await supabase.from('users').select('username').eq('username', username);
-                if (existing && existing.length > 0) { alert('Username already taken!'); return; }
-                const { error } = await supabase.from('users').insert({ username, password, avatar: null, followers: [], following: [] });
-                if (error) throw error;
-                currentUser = username;
-                localStorage.setItem('currentUser', currentUser);
-                await loadUsers();
-                await loadPosts();
-                updateUI();
-                alert('✅ Registration successful! Welcome ' + username);
-                usernameInput.value = '';
-                passwordInput.value = '';
-            } catch (e) {
-                alert('❌ Registration failed: ' + e.message);
-            } finally {
-                registerBtn.textContent = 'Register';
-                registerBtn.disabled = false;
-            }
-        });
-
-        loginBtn.addEventListener('click', async () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            if (!username || !password) { alert('Please fill all fields'); return; }
-            try {
-                loginBtn.textContent = '⏳ Logging in...';
-                loginBtn.disabled = true;
-                const { data, error } = await supabase.from('users').select('*').eq('username', username).eq('password', password);
-                if (error) throw error;
-                if (!data || data.length === 0) { alert('Invalid username or password'); return; }
-                currentUser = username;
-                localStorage.setItem('currentUser', currentUser);
-                await loadUsers();
-                await loadPosts();
-                updateUI();
-                usernameInput.value = '';
-                passwordInput.value = '';
-            } catch (e) {
-                alert('❌ Login failed: ' + e.message);
-            } finally {
-                loginBtn.textContent = 'Login';
-                loginBtn.disabled = false;
-            }
-        });
-
-        logoutBtn.addEventListener('click', () => {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            updateUI();
-        });
-
-        submitPost.addEventListener('click', async () => {
-            const text = postText.value.trim();
-            const username = postUsername.value.trim() || currentUser;
-            if (!text && !postMedia.files[0]) { alert('Write something or add media'); return; }
-            try {
-                submitPost.textContent = '⏳ Posting...';
-                submitPost.disabled = true;
-                let mediaUrl = null;
-                let mediaType = 'text';
-                const file = postMedia.files[0];
-                if (file) {
-                    mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-                    const reader = new FileReader();
-                    mediaUrl = await new Promise((resolve) => {
-                        reader.onload = () => resolve(reader.result);
-                        reader.readAsDataURL(file);
-                    });
-                }
-                const { error } = await supabase.from('posts').insert({
-                    username, text: text || (file ? (mediaType === 'image' ? '📷' : '🎬') : ''),
-                    media: mediaUrl, mediaType, likes: [], comments: [], reposts: 0, saved: [], views: 0
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Access-Key': API_KEY
+                    },
+                    body: JSON.stringify({ posts: posts })
                 });
-                if (error) throw error;
-                postText.value = '';
-                postMedia.value = '';
-                await loadPosts();
-                showPage('home');
+                console.log('✅ Posts saved to JSONBin');
             } catch (e) {
-                alert('❌ Error creating post: ' + e.message);
-            } finally {
-                submitPost.textContent = 'Post';
-                submitPost.disabled = false;
+                console.error('❌ Error saving posts to JSONBin:', e);
             }
-        });
-
-        async function deletePost(postId) {
-            if (!confirm('Delete this post?')) return;
-            try {
-                await supabase.from('posts').delete().eq('id', postId);
-                await loadPosts();
-                renderVideoTikTok();
-            } catch (e) { alert('Error deleting post: ' + e.message); }
         }
 
-        async function toggleLike(postId) {
-            try {
-                const post = posts.find(p => p.id === postId);
-                if (!post) return;
-                let likes = post.likes || [];
-                const idx = likes.indexOf(currentUser);
-                if (idx > -1) likes.splice(idx, 1);
-                else likes.push(currentUser);
-                await supabase.from('posts').update({ likes }).eq('id', postId);
-                await loadPosts();
-            } catch (e) { console.error('Error toggling like:', e); }
+        function savePostsLocal() {
+            localStorage.setItem('posts', JSON.stringify(posts));
         }
 
-        async function toggleSave(postId) {
-            try {
-                const post = posts.find(p => p.id === postId);
-                if (!post) return;
-                let saved = post.saved || [];
-                const idx = saved.indexOf(currentUser);
-                if (idx > -1) saved.splice(idx, 1);
-                else saved.push(currentUser);
-                await supabase.from('posts').update({ saved }).eq('id', postId);
-                await loadPosts();
-            } catch (e) { console.error('Error toggling save:', e); }
+        // ============= ORIGINAL FUNCTIONS (modified) =============
+        function savePosts() {
+            savePostsLocal();
+            savePostsToJSONBin();
         }
 
-        async function addRepost(postId) {
-            try {
-                const post = posts.find(p => p.id === postId);
-                if (!post) return;
-                const reposts = (post.reposts || 0) + 1;
-                await supabase.from('posts').update({ reposts }).eq('id', postId);
-                await supabase.from('posts').insert({
-                    username: currentUser,
-                    text: '🔁 Repost from ' + post.username + ': ' + (post.text || ''),
-                    media: post.media, mediaType: post.mediaType,
-                    likes: [], comments: [], reposts: 0, saved: [], views: 0
-                });
-                await loadPosts();
-            } catch (e) { console.error('Error reposting:', e); }
+        function saveStories() { localStorage.setItem('stories', JSON.stringify(stories)); }
+        function saveChats() { localStorage.setItem('chats', JSON.stringify(chats)); }
+        function saveUsers() { localStorage.setItem('users', JSON.stringify(users)); }
+        function saveNotifs() { localStorage.setItem('notifications', JSON.stringify(notifications)); }
+
+        function syncToFirebase() {
+            console.log('Syncing to JSONBin...');
         }
 
-        async function addComment(postId, text) {
-            try {
-                const post = posts.find(p => p.id === postId);
-                if (!post) return;
-                const comments = post.comments || [];
-                comments.push({ username: currentUser, text, timestamp: Date.now() });
-                await supabase.from('posts').update({ comments }).eq('id', postId);
-                await loadPosts();
-            } catch (e) { console.error('Error adding comment:', e); }
+        function addNotification(type, from, targetId) {
+            notifications.push({ type, from, targetId, timestamp: Date.now(), read: false });
+            saveNotifs();
+            renderNotifications();
+            syncToFirebase();
         }
 
-        async function addView(postId) {
-            try {
-                const post = posts.find(p => p.id === postId);
-                if (!post) return;
-                const views = (post.views || 0) + 1;
-                await supabase.from('posts').update({ views }).eq('id', postId);
-            } catch (e) { console.error('Error adding view:', e); }
-        }
-
-        function renderPosts() {
-            const query = searchInput.value.toLowerCase();
-            let filtered = posts.filter(p => {
-                const matchUser = p.username.toLowerCase().includes(query);
-                const matchText = (p.text || '').toLowerCase().includes(query);
-                return matchUser || matchText;
-            });
-            if (currentTab === 'following') {
-                const following = users[currentUser]?.following || [];
-                filtered = filtered.filter(p => following.includes(p.username));
-            }
-            postsContainer.innerHTML = '';
-            if (!filtered.length) {
-                postsContainer.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">No posts found.</p>';
+        function renderNotifications() {
+            notifList.innerHTML = '';
+            const userNotifs = notifications.filter(n => n.targetId === currentUser || n.from === currentUser);
+            if (!userNotifs.length) {
+                notifList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">No notifications yet.</p>';
                 return;
             }
-            filtered.forEach(p => {
+            userNotifs.slice().reverse().forEach(n => {
+                const div = document.createElement('div');
+                div.className = 'notification-item';
+                const avatar = users[n.from]?.avatar ? `<img src="${users[n.from].avatar}">` : n.from.charAt(0).toUpperCase();
+                let text = '';
+                if (n.type === 'like') text = `${n.from} liked your post.`;
+                else if (n.type === 'comment') text = `${n.from} commented on your post.`;
+                else if (n.type === 'follow') text = `${n.from} started following you.`;
+                else text = `${n.from} interacted with your post.`;
+                div.innerHTML = `<div class="avatar">${avatar}</div><div class="text">${text}</div><div class="time">${new Date(n.timestamp).toLocaleDateString()}</div>`;
+                notifList.appendChild(div);
+            });
+        }
+
+        function toggleFollow() {
+            if (!viewingUser || viewingUser === currentUser) return;
+            if (!users[currentUser].following) users[currentUser].following = [];
+            const idx = users[currentUser].following.indexOf(viewingUser);
+            if (idx > -1) {
+                users[currentUser].following.splice(idx, 1);
+                if (users[viewingUser].followers) {
+                    const fIdx = users[viewingUser].followers.indexOf(currentUser);
+                    if (fIdx > -1) users[viewingUser].followers.splice(fIdx, 1);
+                }
+            } else {
+                users[currentUser].following.push(viewingUser);
+                if (!users[viewingUser].followers) users[viewingUser].followers = [];
+                users[viewingUser].followers.push(currentUser);
+                addNotification('follow', currentUser, viewingUser);
+            }
+            saveUsers();
+            viewProfile(viewingUser);
+            renderUserPosts();
+            syncToFirebase();
+        }
+
+        function openFollowModal(type) {
+            followModalType = type;
+            const targetUser = viewingUser || currentUser;
+            const user = users[targetUser];
+            if (!user) return;
+            const list = type === 'followers' ? (user.followers || []) : (user.following || []);
+            followModalTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
+            followList.innerHTML = '';
+            if (!list.length) {
+                followList.innerHTML = '<p style="color:#888; text-align:center; padding:16px;">No users yet.</p>';
+            } else {
+                list.forEach(u => {
+                    const div = document.createElement('div');
+                    div.className = 'user-item';
+                    const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
+                    div.innerHTML = `<div class="avatar">${avatar}</div><span>${u}</span>`;
+                    div.addEventListener('click', () => {
+                        closeFollowModal();
+                        if (u === currentUser) showPage('profile');
+                        else viewProfile(u);
+                    });
+                    followList.appendChild(div);
+                });
+            }
+            followModal.classList.add('active');
+        }
+
+        function closeFollowModal() {
+            followModal.classList.remove('active');
+        }
+
+        function openShareModal(postId) {
+            sharePostId = postId;
+            const post = posts.find(p => p.id == postId);
+            if (!post) return;
+            shareUserList.innerHTML = '';
+            const following = users[currentUser]?.following || [];
+            if (!following.length) {
+                shareUserList.innerHTML = '<p style="color:#888; padding:12px; text-align:center;">You\'re not following anyone yet.</p>';
+                return;
+            }
+            following.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'user-item';
+                const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
+                div.innerHTML = `<div class="avatar">${avatar}</div><span>${u}</span>`;
+                div.addEventListener('click', () => sharePostWithUser(postId, u));
+                shareUserList.appendChild(div);
+            });
+            shareModal.classList.add('active');
+        }
+
+        function closeShareModal() {
+            shareModal.classList.remove('active');
+            sharePostId = null;
+        }
+
+        function sharePostWithUser(postId, username) {
+            const post = posts.find(p => p.id == postId);
+            if (!post) return;
+            let message = `📤 Post from ${post.username}: ${post.text || '📷'}`;
+            if (post.mediaType === 'image') message = `📤 Post from ${post.username}: 📷 ${post.text || ''}`;
+            else if (post.mediaType === 'video') message = `📤 Post from ${post.username}: 🎬 ${post.text || ''}`;
+            chats.push({ from: currentUser, to: username, text: message, postId: post.id, timestamp: Date.now() });
+            saveChats();
+            alert(`Post shared with ${username}!`);
+            closeShareModal();
+            renderChatUserList();
+            syncToFirebase();
+        }
+
+        function renderChatUserList() {
+            chatUserList.innerHTML = '';
+            chatConversation.style.display = 'none';
+            const following = users[currentUser]?.following || [];
+            if (!following.length) {
+                chatUserList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">You\'re not following anyone yet. Follow users to chat with them.</p>';
+                return;
+            }
+            following.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'chat-user-item';
+                const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
+                const lastMsg = chats.filter(c => (c.from === u && c.to === currentUser) || (c.from === currentUser && c.to === u)).pop();
+                div.innerHTML = `<div class="avatar">${avatar}</div><div class="name">${u}</div><div class="last-msg">${lastMsg ? lastMsg.text.substring(0, 20) + (lastMsg.text.length > 20 ? '...' : '') : 'No messages'}</div>`;
+                div.addEventListener('click', () => openChatWithUser(u));
+                chatUserList.appendChild(div);
+            });
+        }
+
+        function openChatWithUser(username) {
+            selectedChatUser = username;
+            chatUserList.style.display = 'none';
+            chatConversation.style.display = 'flex';
+            renderPrivateChat(username);
+        }
+
+        function closeChat() {
+            selectedChatUser = null;
+            chatUserList.style.display = 'block';
+            chatConversation.style.display = 'none';
+        }
+
+        function renderPrivateChat(username) {
+            chatMessages.innerHTML = '';
+            const userChats = chats.filter(c => (c.from === currentUser && c.to === username) || (c.from === username && c.to === currentUser));
+            if (!userChats.length) {
+                chatMessages.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">No messages yet.</p>';
+                return;
+            }
+            userChats.forEach(c => {
+                const div = document.createElement('div');
+                div.className = `chat-message ${c.from === currentUser ? 'me' : 'other'}`;
+                const avatar = users[c.from]?.avatar ? `<img src="${users[c.from].avatar}">` : c.from.charAt(0).toUpperCase();
+                let mediaHTML = '';
+                if (c.media) {
+                    if (c.mediaType === 'image') mediaHTML = `<img src="${c.media}" style="max-width:200px; border-radius:8px; margin-top:4px;">`;
+                    else if (c.mediaType === 'video') mediaHTML = `<video src="${c.media}" controls style="max-width:200px; border-radius:8px; margin-top:4px;"></video>`;
+                }
+                div.innerHTML = `<div class="msg-avatar ${users[c.from]?.avatar ? '' : 'default'}">${avatar}</div><div class="msg-text"><div class="msg-username">${c.from}</div><div class="msg-content">${c.text}</div>${mediaHTML}</div>`;
+                chatMessages.appendChild(div);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendChatMedia(event) {
+            const file = event.target.files[0];
+            if (!file || !selectedChatUser) return;
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+                const mediaData = reader.result;
+                chats.push({ from: currentUser, to: selectedChatUser, text: '', media: mediaData, mediaType, timestamp: Date.now() });
+                saveChats();
+                renderPrivateChat(selectedChatUser);
+                renderChatUserList();
+                syncToFirebase();
+            };
+            chatMediaInput.value = '';
+        }
+
+        sendChatBtn.addEventListener('click', () => {
+            const text = chatInput.value.trim();
+            if (!text || !selectedChatUser) return;
+            chats.push({ from: currentUser, to: selectedChatUser, text, timestamp: Date.now() });
+            saveChats();
+            chatInput.value = '';
+            renderPrivateChat(selectedChatUser);
+            renderChatUserList();
+            syncToFirebase();
+        });
+
+        chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
+
+        function switchProfileTab(tab) {
+            profileTab = tab;
+            document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.profile-tab[data-tab="${tab}"]`)?.classList.add('active');
+            renderUserPosts();
+        }
+
+        function deletePost(postId) {
+            if (!confirm('Are you sure you want to delete this post?')) return;
+            posts = posts.filter(p => p.id != postId);
+            savePosts();
+            renderPosts();
+            renderVideoTikTok();
+            renderUserPosts();
+            renderExplore();
+            if (viewingUser) viewProfile(viewingUser);
+            if (document.getElementById('detailPage').classList.contains('active')) showPage('home');
+            syncToFirebase();
+        }
+
+        function openCommentsOverlay(postId) {
+            activeCommentPostId = postId;
+            const post = posts.find(p => p.id == postId);
+            if (!post) return;
+            commentsOverlayContent.innerHTML = '';
+            if (post.comments && post.comments.length) {
+                post.comments.slice().reverse().forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'comment-item';
+                    const avatar = users[c.username]?.avatar ? `<img src="${users[c.username].avatar}" class="comment-avatar">` : `<div class="comment-avatar default">${c.username.charAt(0).toUpperCase()}</div>`;
+                    div.innerHTML = `<div class="comment-header">${avatar}<span class="comment-username">${c.username}</span><span style="font-size:10px;color:#666;">${new Date(c.timestamp || Date.now()).toLocaleDateString()}</span></div><div class="comment-text">${c.text}</div>`;
+                    commentsOverlayContent.appendChild(div);
+                });
+            } else {
+                commentsOverlayContent.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No comments yet.</p>';
+            }
+            commentsOverlay.classList.add('open');
+        }
+
+        function closeCommentsOverlay() {
+            commentsOverlay.classList.remove('open');
+            activeCommentPostId = null;
+        }
+
+        commentOverlaySend.addEventListener('click', () => {
+            if (!activeCommentPostId) return;
+            const text = commentOverlayInput.value.trim();
+            if (!text) return;
+            const post = posts.find(p => p.id == activeCommentPostId);
+            if (!post) return;
+            if (!post.comments) post.comments = [];
+            post.comments.push({ username: currentUser, text, timestamp: Date.now() });
+            savePosts();
+            addNotification('comment', currentUser, post.username);
+            commentOverlayInput.value = '';
+            openCommentsOverlay(activeCommentPostId);
+            renderPosts();
+            renderVideoTikTok();
+            syncToFirebase();
+        });
+
+        function viewProfile(username) {
+            if (!users[username]) { alert('User not found'); return; }
+            viewingUser = username;
+            const user = users[username];
+            viewerName.textContent = username;
+            viewerAvatar.innerHTML = user.avatar ? `<img src="${user.avatar}">` : '👤';
+            viewerFollowersCount.textContent = (user.followers || []).length;
+            viewerFollowingCount.textContent = (user.following || []).length;
+            if (username === currentUser) {
+                viewerFollowBtn.style.display = 'none';
+            } else {
+                viewerFollowBtn.style.display = 'block';
+                const isFollowing = (users[currentUser].following || []).includes(username);
+                viewerFollowBtn.textContent = isFollowing ? 'Following' : 'Follow';
+                viewerFollowBtn.className = isFollowing ? 'follow-btn following' : 'follow-btn';
+            }
+            const userPosts = posts.filter(p => p.username === username);
+            viewerPosts.innerHTML = '';
+            if (!userPosts.length) {
+                viewerPosts.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No posts yet.</p>';
+                return;
+            }
+            userPosts.slice().reverse().forEach(p => {
                 const div = document.createElement('div');
                 div.className = 'masonry-item';
                 let mediaHTML = '';
                 if (p.mediaType === 'image' && p.media) mediaHTML = `<img src="${p.media}">`;
-                else if (p.mediaType === 'video' && p.media) mediaHTML = `<video src="${p.media}" muted></video>`;
+                else if (p.mediaType === 'video' && p.media) mediaHTML = `<video src="${videoFiles[p.id] || p.media}" muted></video>`;
                 else mediaHTML = `<div class="icon-big">📝</div>`;
-                const liked = p.likes && p.likes.includes(currentUser);
-                const saved = p.saved && p.saved.includes(currentUser);
-                const isOwner = p.username === currentUser;
-                div.innerHTML = `
-                    ${mediaHTML}
-                    <div class="overlay">
-                        <span class="username" onclick="event.stopPropagation();viewProfile('${p.username}')">${p.username}</span>
-                        <span class="text">${p.text || ''}</span>
-                        <span style="color:#666; font-size:10px; position:absolute; bottom:30px; right:8px;">👁️ ${p.views || 0}</span>
-                    </div>
-                    <div class="masonry-actions">
-                        <span class="view-count">👁️ ${p.views || 0}</span>
-                        <button class="like-btn ${liked?'liked':''}" data-id="${p.id}">❤️ ${p.likes?p.likes.length:0}</button>
-                        <button class="comment-toggle-grid" data-id="${p.id}" onclick="openCommentsOverlay('${p.id}')">💬 ${p.comments?p.comments.length:0}</button>
-                        <button class="repost-btn" data-id="${p.id}">🔁 ${p.reposts||0}</button>
-                        <button class="save-btn ${saved?'saved':''}" data-id="${p.id}">🔖</button>
-                        ${isOwner?`<button class="delete-btn" onclick="deletePost('${p.id}')">🗑️</button>`:''}
-                        <button class="share-btn" onclick="openShareModal('${p.id}')">📤</button>
-                    </div>
-                `;
-                div.addEventListener('click', (e) => {
-                    if (e.target.closest('button') || e.target.closest('.username')) return;
-                    showDetail(p.id);
-                });
-                postsContainer.appendChild(div);
+                div.innerHTML = `${mediaHTML}<div class="overlay"><span class="username">${p.username}</span><span class="text">${p.text || ''}</span><span style="color:#666; font-size:10px; position:absolute; bottom:30px; right:8px;">👁️ ${p.views || 0}</span></div>`;
+                div.addEventListener('click', () => showDetail(p.id));
+                viewerPosts.appendChild(div);
             });
-            attachPostEvents();
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            profileViewer.classList.add('active');
         }
 
-        function attachPostEvents() {
-            document.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    toggleLike(this.dataset.id);
-                });
-            });
-            document.querySelectorAll('.repost-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    addRepost(this.dataset.id);
-                });
-            });
-            document.querySelectorAll('.save-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    toggleSave(this.dataset.id);
-                });
-            });
+        function closeProfileViewer() {
+            viewingUser = null;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('home').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector('.nav-item[data-page="home"]')?.classList.add('active');
         }
 
         function renderExplore() {
@@ -543,13 +842,502 @@
                 const div = document.createElement('div');
                 div.className = 'explore-item';
                 if (p.mediaType === 'image' && p.media) {
-                    div.innerHTML = `<img src="${p.media}" onclick="showDetail('${p.id}')">`;
+                    div.innerHTML = `<img src="${p.media}" onclick="showDetail(${p.id})">`;
                 } else if (p.mediaType === 'video' && p.media) {
-                    div.innerHTML = `<div class="icon-big" onclick="showDetail('${p.id}')">🎬</div>`;
+                    div.innerHTML = `<div class="icon-big" onclick="showDetail(${p.id})">🎬</div>`;
                 } else {
-                    div.innerHTML = `<div class="icon-big" onclick="showDetail('${p.id}')">📝</div>`;
+                    div.innerHTML = `<div class="icon-big" onclick="showDetail(${p.id})">📝</div>`;
                 }
                 exploreGrid.appendChild(div);
+            });
+        }
+
+        function toggleAccountEdit() {
+            const el = document.getElementById('accountEdit');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('editUsername').value = currentUser;
+            document.getElementById('editPassword').value = '';
+        }
+
+        function saveAccountSettings() {
+            const newUsername = document.getElementById('editUsername').value.trim();
+            const newPassword = document.getElementById('editPassword').value.trim();
+            if (!newUsername) return alert('Username cannot be empty');
+            if (newUsername !== currentUser && users[newUsername]) {
+                return alert('Username already taken');
+            }
+            const userData = users[currentUser];
+            delete users[currentUser];
+            users[newUsername] = userData;
+            posts.forEach(p => { if (p.username === currentUser) p.username = newUsername; });
+            chats.forEach(c => {
+                if (c.from === currentUser) c.from = newUsername;
+                if (c.to === currentUser) c.to = newUsername;
+            });
+            stories.forEach(s => { if (s.username === currentUser) s.username = newUsername; });
+            Object.keys(users).forEach(u => {
+                if (users[u].following) {
+                    const idx = users[u].following.indexOf(currentUser);
+                    if (idx > -1) users[u].following[idx] = newUsername;
+                }
+                if (users[u].followers) {
+                    const idx = users[u].followers.indexOf(currentUser);
+                    if (idx > -1) users[u].followers[idx] = newUsername;
+                }
+            });
+            if (newPassword) userData.password = newPassword;
+            currentUser = newUsername;
+            localStorage.setItem('currentUser', currentUser);
+            saveUsers();
+            savePosts();
+            saveChats();
+            saveStories();
+            updateUI();
+            alert('Account updated successfully!');
+            syncToFirebase();
+        }
+
+        function deleteAccount() {
+            if (!confirm('Are you sure you want to delete your account? This cannot be undone!')) return;
+            delete users[currentUser];
+            saveUsers();
+            posts = posts.filter(p => p.username !== currentUser);
+            savePosts();
+            Object.keys(users).forEach(u => {
+                if (users[u].following) {
+                    users[u].following = users[u].following.filter(f => f !== currentUser);
+                }
+                if (users[u].followers) {
+                    users[u].followers = users[u].followers.filter(f => f !== currentUser);
+                }
+            });
+            saveUsers();
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            updateUI();
+            alert('Account deleted.');
+            syncToFirebase();
+        }
+
+        function setTheme(theme) {
+            const body = document.body;
+            const darkBtn = document.getElementById('themeDark');
+            const lightBtn = document.getElementById('themeLight');
+            if (theme === 'dark') {
+                body.style.background = '#000';
+                body.style.color = '#fff';
+                document.querySelectorAll('.page').forEach(p => p.style.background = '#111');
+                darkBtn.classList.add('active');
+                lightBtn.classList.remove('active');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.style.background = '#f5f5f5';
+                body.style.color = '#111';
+                document.querySelectorAll('.page').forEach(p => p.style.background = '#fff');
+                lightBtn.classList.add('active');
+                darkBtn.classList.remove('active');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        function performSearch() {
+            const query = settingsSearch.value.trim().toLowerCase();
+            if (!query) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            searchResults.style.display = 'block';
+            searchResults.innerHTML = '';
+            const userResults = Object.keys(users).filter(u => u.toLowerCase().includes(query));
+            const postResults = posts.filter(p => p.text && p.text.toLowerCase().includes(query));
+            const hashtagResults = [];
+            posts.forEach(p => {
+                if (p.text) {
+                    const hashtags = p.text.match(/#[\w]+/g) || [];
+                    hashtags.forEach(h => {
+                        if (h.toLowerCase().includes(query) && !hashtagResults.includes(h)) {
+                            hashtagResults.push(h);
+                        }
+                    });
+                }
+            });
+            if (!userResults.length && !postResults.length && !hashtagResults.length) {
+                searchResults.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No results found.</p>';
+                return;
+            }
+            if (userResults.length) {
+                const h = document.createElement('h4');
+                h.textContent = 'Users';
+                h.style.color = '#888';
+                searchResults.appendChild(h);
+                userResults.forEach(u => {
+                    const div = document.createElement('div');
+                    div.className = 'search-result-item';
+                    const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
+                    div.innerHTML = `<div class="avatar">${avatar}</div><span class="name">${u}</span><span class="type">User</span>`;
+                    div.addEventListener('click', () => {
+                        if (u === currentUser) showPage('profile');
+                        else viewProfile(u);
+                    });
+                    searchResults.appendChild(div);
+                });
+            }
+            if (postResults.length) {
+                const h = document.createElement('h4');
+                h.textContent = 'Posts';
+                h.style.color = '#888';
+                searchResults.appendChild(h);
+                postResults.slice(0, 5).forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'search-result-item';
+                    div.innerHTML = `<span class="name">📝 ${p.text.substring(0, 40)}${p.text.length > 40 ? '...' : ''}</span><span class="type">Post</span>`;
+                    div.addEventListener('click', () => showDetail(p.id));
+                    searchResults.appendChild(div);
+                });
+            }
+            if (hashtagResults.length) {
+                const h = document.createElement('h4');
+                h.textContent = 'Hashtags';
+                h.style.color = '#888';
+                searchResults.appendChild(h);
+                hashtagResults.forEach(tag => {
+                    const div = document.createElement('div');
+                    div.className = 'search-result-item';
+                    div.innerHTML = `<span class="name">${tag}</span><span class="type">Hashtag</span>`;
+                    div.addEventListener('click', () => {
+                        settingsSearch.value = tag;
+                        performSearch();
+                    });
+                    searchResults.appendChild(div);
+                });
+            }
+        }
+
+        function updateUI() {
+            if (currentUser && users[currentUser]) {
+                authPage.classList.remove('active');
+                nav.style.display = 'flex';
+                showPage('home');
+                renderPosts();
+                renderVideoTikTok();
+                renderChatUserList();
+                renderStories();
+                renderExplore();
+                renderNotifications();
+                profileName.textContent = currentUser;
+                if (users[currentUser].avatar) {
+                    profileAvatar.innerHTML = `<img src="${users[currentUser].avatar}">`;
+                } else {
+                    profileAvatar.innerHTML = '👤';
+                }
+                renderUserPosts();
+                syncToFirebase();
+            } else {
+                authPage.classList.add('active');
+                nav.style.display = 'none';
+            }
+        }
+
+        function switchMode() {
+            isLogin = !isLogin;
+            loginBtn.style.display = isLogin ? 'block' : 'none';
+            registerBtn.style.display = isLogin ? 'none' : 'block';
+            switchAuth.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Login";
+        }
+        switchAuth.addEventListener('click', switchMode);
+
+        loginBtn.addEventListener('click', () => {
+            const u = usernameInput.value.trim();
+            const p = passwordInput.value.trim();
+            if (users[u] && users[u].password === p) {
+                currentUser = u;
+                localStorage.setItem('currentUser', u);
+                updateUI();
+            } else {
+                alert('Invalid username or password');
+            }
+        });
+
+        registerBtn.addEventListener('click', () => {
+            const u = usernameInput.value.trim();
+            const p = passwordInput.value.trim();
+            if (!u || !p) return alert('Fill all fields');
+            if (users[u]) return alert('User already exists');
+            users[u] = { password: p, avatar: null, followers: [], following: [] };
+            saveUsers();
+            currentUser = u;
+            localStorage.setItem('currentUser', u);
+            updateUI();
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            updateUI();
+        });
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
+            if (id === 'home') renderPosts();
+            if (id === 'video') renderVideoTikTok();
+            if (id === 'chat') renderChatUserList();
+            if (id === 'profile') renderUserPosts();
+            if (id === 'explore') renderExplore();
+            if (id === 'notifications') renderNotifications();
+            if (id === 'settings') {
+                document.getElementById('editUsername').value = currentUser;
+            }
+        }
+
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.page;
+                if (id === 'addPost' && !currentUser) return alert('Please login first');
+                showPage(id);
+            });
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentTab = tab.dataset.tab;
+                renderPosts();
+            });
+        });
+
+        searchInput.addEventListener('input', renderPosts);
+
+        function getMediaType(file) {
+            if (!file) return 'text';
+            return file.type.startsWith('video/') ? 'video' : 'image';
+        }
+
+        function renderStories() {
+            storiesContainer.innerHTML = '';
+            const addDiv = document.createElement('div');
+            addDiv.className = 'story-circle';
+            addDiv.innerHTML = `<button class="add-btn" onclick="document.getElementById('storyMedia').click();">+</button><span class="name">Add</span><input type="file" id="storyMedia" accept="image/*,video/*" style="display:none;" onchange="addStory(event)">`;
+            storiesContainer.appendChild(addDiv);
+            stories.forEach((s, index) => {
+                const div = document.createElement('div');
+                div.className = 'story-circle';
+                const avatarContent = users[s.username]?.avatar ? `<img src="${users[s.username].avatar}">` : `<div class="default-avatar">${s.username.charAt(0).toUpperCase()}</div>`;
+                div.innerHTML = `<div class="avatar" onclick="viewStory(${index})">${avatarContent}</div><span class="name">${s.username}</span>`;
+                storiesContainer.appendChild(div);
+            });
+        }
+
+        function addStory(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                stories.push({ username: currentUser, media: reader.result, mediaType: file.type.startsWith('video/') ? 'video' : 'image', timestamp: Date.now() });
+                saveStories();
+                renderStories();
+                syncToFirebase();
+            };
+        }
+
+        function viewStory(index) {
+            const story = stories[index];
+            if (!story) return;
+            storyViewer.classList.add('active');
+            storyInfo.textContent = story.username;
+            storyProgressFill.style.width = '0%';
+            if (story.mediaType === 'video') {
+                storyVideo.style.display = 'block';
+                storyImage.style.display = 'none';
+                storyVideo.src = story.media;
+                storyVideo.play();
+                storyVideo.addEventListener('timeupdate', function() {
+                    const progress = (this.currentTime / this.duration) * 100;
+                    storyProgressFill.style.width = progress + '%';
+                });
+            } else {
+                storyImage.style.display = 'block';
+                storyVideo.style.display = 'none';
+                storyImage.src = story.media;
+                let progress = 0;
+                if (storyInterval) clearInterval(storyInterval);
+                storyInterval = setInterval(() => {
+                    progress += 2;
+                    storyProgressFill.style.width = progress + '%';
+                    if (progress >= 100) { clearInterval(storyInterval); closeStory(); }
+                }, 100);
+            }
+        }
+
+        function closeStory() {
+            storyViewer.classList.remove('active');
+            storyVideo.pause();
+            storyVideo.src = '';
+            storyImage.src = '';
+            storyProgressFill.style.width = '0%';
+            if (storyInterval) { clearInterval(storyInterval); storyInterval = null; }
+        }
+
+        function renderPosts() {
+            const query = searchInput.value.toLowerCase();
+            let filtered = posts.filter(p => {
+                const matchUser = p.username.toLowerCase().includes(query);
+                const matchText = p.text.toLowerCase().includes(query);
+                return matchUser || matchText;
+            });
+            if (currentTab === 'following') {
+                const following = users[currentUser]?.following || [];
+                filtered = filtered.filter(p => following.includes(p.username));
+            }
+            postsContainer.innerHTML = '';
+            if (!filtered.length) {
+                postsContainer.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">No posts found.</p>';
+                return;
+            }
+            filtered.slice().reverse().forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'masonry-item';
+                let mediaHTML = '';
+                if (p.mediaType === 'image' && p.media) mediaHTML = `<img src="${p.media}">`;
+                else if (p.mediaType === 'video' && p.media) mediaHTML = `<video src="${videoFiles[p.id] || p.media}" muted></video>`;
+                else mediaHTML = `<div class="icon-big">📝</div>`;
+                const liked = p.likes && p.likes.includes(currentUser);
+                const saved = p.saved && p.saved.includes(currentUser);
+                const isOwner = p.username === currentUser;
+                div.innerHTML = `${mediaHTML}<div class="overlay"><span class="username" onclick="event.stopPropagation();viewProfile('${p.username}')">${p.username}</span><span class="text">${p.text || ''}</span><span style="color:#666; font-size:10px; position:absolute; bottom:30px; right:8px;">👁️ ${p.views || 0}</span></div><div class="masonry-actions"><span class="view-count">👁️ ${p.views || 0}</span><button class="like-btn ${liked?'liked':''}" data-id="${p.id}">❤️ ${p.likes?p.likes.length:0}</button><button class="comment-toggle-grid" data-id="${p.id}" onclick="openCommentsOverlay(${p.id})">💬 ${p.comments?p.comments.length:0}</button><button class="repost-btn" data-id="${p.id}">🔁 ${p.reposts||0}</button><button class="save-btn ${saved?'saved':''}" data-id="${p.id}">🔖</button>${isOwner?`<button class="delete-btn" onclick="deletePost(${p.id})">🗑️</button>`:''}<button class="share-btn" onclick="openShareModal(${p.id})">📤</button></div>`;
+                div.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('.username')) return; showDetail(p.id); });
+                postsContainer.appendChild(div);
+            });
+            attachPostEvents();
+        }
+
+        function attachPostEvents() {
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.likes) post.likes = [];
+                    const idx = post.likes.indexOf(currentUser);
+                    if (idx > -1) post.likes.splice(idx, 1);
+                    else {
+                        post.likes.push(currentUser);
+                        if (post.username !== currentUser) {
+                            addNotification('like', currentUser, post.username);
+                        }
+                    }
+                    savePosts();
+                    renderPosts();
+                    syncToFirebase();
+                });
+            });
+            document.querySelectorAll('.repost-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.reposts) post.reposts = 0;
+                    post.reposts += 1;
+                    const repost = { ...post, id: Date.now(), text: `🔁 Repost from ${post.username}: ${post.text}` };
+                    posts.push(repost);
+                    savePosts();
+                    renderPosts();
+                    syncToFirebase();
+                });
+            });
+            document.querySelectorAll('.save-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.saved) post.saved = [];
+                    const idx = post.saved.indexOf(currentUser);
+                    if (idx > -1) post.saved.splice(idx, 1);
+                    else post.saved.push(currentUser);
+                    savePosts();
+                    renderPosts();
+                    syncToFirebase();
+                });
+            });
+        }
+
+        function showDetail(postId) {
+            const post = posts.find(p => p.id == postId);
+            if (!post) return;
+            if (!post.views) post.views = 0;
+            post.views += 1;
+            savePosts();
+            const related = posts.filter(p => p.id !== postId && p.username === post.username);
+            detailContainer.innerHTML = '';
+            const div = document.createElement('div');
+            div.className = 'detail-item';
+            let mediaHTML = '';
+            if (post.mediaType === 'image' && post.media) mediaHTML = `<img src="${post.media}">`;
+            else if (post.mediaType === 'video' && post.media) mediaHTML = `<video src="${videoFiles[post.id] || post.media}" controls></video>`;
+            else mediaHTML = `<div class="icon-big">📝</div>`;
+            const liked = post.likes && post.likes.includes(currentUser);
+            const saved = post.saved && post.saved.includes(currentUser);
+            const isOwner = post.username === currentUser;
+            div.innerHTML = `${mediaHTML}<div class="info"><div class="username" style="cursor:pointer;" onclick="viewProfile('${post.username}')">${post.username}</div><div class="text">${post.text || ''}</div><div style="color:#666; font-size:12px; margin-top:4px;">👁️ ${post.views || 0} views</div></div><div class="detail-actions"><span class="view-count">👁️ ${post.views || 0}</span><button class="like-btn-detail ${liked?'liked':''}" data-id="${post.id}">❤️ ${post.likes?post.likes.length:0}</button><button class="comment-toggle-detail" data-id="${post.id}" onclick="openCommentsOverlay(${post.id})">💬 ${post.comments?post.comments.length:0}</button><button class="repost-btn-detail" data-id="${post.id}">🔁 ${post.reposts||0}</button><button class="save-btn-detail ${saved?'saved':''}" data-id="${post.id}">🔖</button>${isOwner?`<button class="delete-btn" onclick="deletePost(${post.id})">🗑️</button>`:''}<button class="share-btn" onclick="openShareModal(${post.id})">📤</button></div><h4 style="padding:12px;color:#888;">Related Posts</h4><div class="related-grid" style="padding:12px;">${related.length?related.map(r=>`<div class="related-item" onclick="showDetail(${r.id})">${r.mediaType==='image'&&r.media?`<img src="${r.media}">`:`<div class="icon-big">${r.mediaType==='video'?'🎬':'📝'}</div>`}</div>`).join(''):'<p style="color:#888;grid-column:span 2;text-align:center;">No related posts</p>'}</div>`;
+            detailContainer.appendChild(div);
+            showPage('detailPage');
+
+            document.querySelectorAll('.like-btn-detail').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.likes) post.likes = [];
+                    const idx = post.likes.indexOf(currentUser);
+                    if (idx > -1) post.likes.splice(idx, 1);
+                    else {
+                        post.likes.push(currentUser);
+                        if (post.username !== currentUser) {
+                            addNotification('like', currentUser, post.username);
+                        }
+                    }
+                    savePosts();
+                    showDetail(id);
+                    syncToFirebase();
+                });
+            });
+            document.querySelectorAll('.repost-btn-detail').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.reposts) post.reposts = 0;
+                    post.reposts += 1;
+                    const repost = { ...post, id: Date.now(), text: `🔁 Repost from ${post.username}: ${post.text}` };
+                    posts.push(repost);
+                    savePosts();
+                    showDetail(id);
+                    syncToFirebase();
+                });
+            });
+            document.querySelectorAll('.save-btn-detail').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.saved) post.saved = [];
+                    const idx = post.saved.indexOf(currentUser);
+                    if (idx > -1) post.saved.splice(idx, 1);
+                    else post.saved.push(currentUser);
+                    savePosts();
+                    showDetail(id);
+                    syncToFirebase();
+                });
             });
         }
 
@@ -561,33 +1349,18 @@
                 container.innerHTML = '<p style="color:#888; text-align:center; padding: 40px;">No videos yet.</p>';
                 return;
             }
-            videos.forEach(p => {
+            videos.slice().reverse().forEach(p => {
                 const slide = document.createElement('div');
                 slide.className = 'video-slide';
+                const videoUrl = videoFiles[p.id] || p.media;
                 const liked = p.likes && p.likes.includes(currentUser);
                 const saved = p.saved && p.saved.includes(currentUser);
                 const isOwner = p.username === currentUser;
                 const avatar = users[p.username]?.avatar ? `<img src="${users[p.username].avatar}" class="video-avatar">` : `<div class="video-avatar default">${p.username.charAt(0).toUpperCase()}</div>`;
-                slide.innerHTML = `
-                    <video src="${p.media}" loop playsinline></video>
-                    <div class="video-header" onclick="viewProfile('${p.username}')">${avatar}<span class="video-username">${p.username}</span></div>
-                    <div class="info">${p.username}: ${p.text || ''} • 👁️ ${p.views || 0}</div>
-                    <div class="actions-right">
-                        <span class="view-count">👁️ ${p.views||0}</span>
-                        <button class="like-btn-video ${liked?'liked':''}" data-id="${p.id}">❤️ ${p.likes?p.likes.length:0}</button>
-                        <button class="comment-toggle-video" data-id="${p.id}" onclick="openCommentsOverlay('${p.id}')">💬 ${p.comments?p.comments.length:0}</button>
-                        <button class="repost-btn-video" data-id="${p.id}">🔁 ${p.reposts||0}</button>
-                        <button class="save-btn-video ${saved?'saved':''}" data-id="${p.id}">🔖</button>
-                        ${isOwner?`<button class="delete-btn" onclick="deletePost('${p.id}')">🗑️</button>`:''}
-                        <button class="share-btn" onclick="openShareModal('${p.id}')">📤</button>
-                    </div>
-                    <div class="player-controls">
-                        <div class="top-row"><button class="play-btn" data-id="${p.id}">▶️</button><span class="time">0:00 / 0:00</span><button class="mute-btn">🔊</button></div>
-                        <div class="progress-bar" data-id="${p.id}"><div class="progress-fill" style="width:0%;"></div></div>
-                    </div>
-                `;
+                slide.innerHTML = `<video src="${videoUrl}" loop playsinline></video><div class="video-header" onclick="viewProfile('${p.username}')">${avatar}<span class="video-username">${p.username}</span></div><div class="info">${p.username}: ${p.text} • 👁️ ${p.views || 0}</div><div class="actions-right"><span class="view-count">👁️ ${p.views||0}</span><button class="like-btn-video ${liked?'liked':''}" data-id="${p.id}">❤️ ${p.likes?p.likes.length:0}</button><button class="comment-toggle-video" data-id="${p.id}" onclick="openCommentsOverlay(${p.id})">💬 ${p.comments?p.comments.length:0}</button><button class="repost-btn-video" data-id="${p.id}">🔁 ${p.reposts||0}</button><button class="save-btn-video ${saved?'saved':''}" data-id="${p.id}">🔖</button>${isOwner?`<button class="delete-btn" onclick="deletePost(${p.id})">🗑️</button>`:''}<button class="share-btn" onclick="openShareModal(${p.id})">📤</button></div><div class="player-controls"><div class="top-row"><button class="play-btn" data-id="${p.id}">▶️</button><span class="time">0:00 / 0:00</span><button class="mute-btn">🔊</button></div><div class="progress-bar" data-id="${p.id}"><div class="progress-fill" style="width:0%;"></div></div></div>`;
                 container.appendChild(slide);
             });
+
             document.querySelectorAll('.play-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const slide = this.closest('.video-slide');
@@ -628,16 +1401,88 @@
                     }
                 });
             });
+
             document.querySelectorAll('.like-btn-video').forEach(btn => {
-                btn.addEventListener('click', function() { toggleLike(this.dataset.id); });
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.likes) post.likes = [];
+                    const idx = post.likes.indexOf(currentUser);
+                    if (idx > -1) post.likes.splice(idx, 1);
+                    else {
+                        post.likes.push(currentUser);
+                        if (post.username !== currentUser) {
+                            addNotification('like', currentUser, post.username);
+                        }
+                    }
+                    savePosts();
+                    renderVideoTikTok();
+                    syncToFirebase();
+                });
             });
             document.querySelectorAll('.repost-btn-video').forEach(btn => {
-                btn.addEventListener('click', function() { addRepost(this.dataset.id); });
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.reposts) post.reposts = 0;
+                    post.reposts += 1;
+                    const repost = { ...post, id: Date.now(), text: `🔁 Repost from ${post.username}: ${post.text}` };
+                    posts.push(repost);
+                    savePosts();
+                    renderVideoTikTok();
+                    syncToFirebase();
+                });
             });
             document.querySelectorAll('.save-btn-video').forEach(btn => {
-                btn.addEventListener('click', function() { toggleSave(this.dataset.id); });
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const post = posts.find(p => p.id == id);
+                    if (!post) return;
+                    if (!post.saved) post.saved = [];
+                    const idx = post.saved.indexOf(currentUser);
+                    if (idx > -1) post.saved.splice(idx, 1);
+                    else post.saved.push(currentUser);
+                    savePosts();
+                    renderVideoTikTok();
+                    syncToFirebase();
+                });
             });
         }
+
+        submitPost.addEventListener('click', () => {
+            const text = postText.value.trim();
+            const username = postUsername.value.trim() || currentUser || 'Anonymous';
+            const file = postMedia.files[0];
+            const mediaType = file ? getMediaType(file) : 'text';
+            if (file) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const newPost = { id: Date.now(), username, text: text || (mediaType === 'image' ? '📷' : '🎬'), media: reader.result, mediaType, likes: [], comments: [], reposts: 0, saved: [], views: 0 };
+                    if (mediaType === 'video') { const videoUrl = URL.createObjectURL(file); videoFiles[newPost.id] = videoUrl; }
+                    posts.push(newPost);
+                    savePosts();
+                    postText.value = '';
+                    postMedia.value = '';
+                    renderPosts();
+                    renderVideoTikTok();
+                    renderExplore();
+                    showPage('home');
+                    syncToFirebase();
+                };
+            } else {
+                if (!text) return alert('Write something or add a media');
+                posts.push({ id: Date.now(), username, text, media: null, mediaType: 'text', likes: [], comments: [], reposts: 0, saved: [], views: 0 });
+                savePosts();
+                postText.value = '';
+                renderPosts();
+                renderExplore();
+                showPage('home');
+                syncToFirebase();
+            }
+        });
 
         function renderUserPosts() {
             let filtered = [];
@@ -646,9 +1491,11 @@
                 case 'myposts': filtered = userPosts; break;
                 case 'liked': filtered = posts.filter(p => p.likes && p.likes.includes(currentUser)); break;
                 case 'saved': filtered = posts.filter(p => p.saved && p.saved.includes(currentUser)); break;
-                case 'reposted': filtered = posts.filter(p => p.text && p.text.includes('Repost from') && p.username === currentUser); break;
+                case 'reposted': filtered = posts.filter(p => p.text && p.text.includes('🔁 Repost from') && p.username === currentUser); break;
                 default: filtered = userPosts;
             }
+            const allLiked = posts.filter(p => p.likes && p.likes.includes(currentUser));
+            const allSaved = posts.filter(p => p.saved && p.saved.includes(currentUser));
             const user = users[currentUser];
             followersCount.textContent = (user?.followers || []).length;
             followingCount.textContent = (user?.following || []).length;
@@ -663,544 +1510,39 @@
                 div.className = 'masonry-item';
                 let mediaHTML = '';
                 if (p.mediaType === 'image' && p.media) mediaHTML = `<img src="${p.media}">`;
-                else if (p.mediaType === 'video' && p.media) mediaHTML = `<video src="${p.media}" muted></video>`;
+                else if (p.mediaType === 'video' && p.media) mediaHTML = `<video src="${videoFiles[p.id] || p.media}" muted></video>`;
                 else mediaHTML = `<div class="icon-big">📝</div>`;
-                div.innerHTML = `
-                    ${mediaHTML}
-                    <div class="overlay">
-                        <span class="username">${p.username}</span>
-                        <span class="text">${p.text || ''}</span>
-                        <span style="color:#666; font-size:10px; position:absolute; bottom:30px; right:8px;">👁️ ${p.views || 0}</span>
-                    </div>
-                `;
+                div.innerHTML = `${mediaHTML}<div class="overlay"><span class="username">${p.username}</span><span class="text">${p.text || ''}</span><span style="color:#666; font-size:10px; position:absolute; bottom:30px; right:8px;">👁️ ${p.views || 0}</span></div>`;
                 div.addEventListener('click', () => showDetail(p.id));
                 userPostsDiv.appendChild(div);
             });
         }
 
-        function renderStories() {
-            storiesContainer.innerHTML = '';
-            const addDiv = document.createElement('div');
-            addDiv.className = 'story-circle';
-            addDiv.innerHTML = `<button class="add-btn" onclick="document.getElementById('storyMedia').click();">+</button><span class="name">Add</span><input type="file" id="storyMedia" accept="image/*,video/*" style="display:none;" onchange="addStory(event)">`;
-            storiesContainer.appendChild(addDiv);
-        }
-
-        async function addStory(event) {
-            alert('Story upload coming soon with Supabase Storage!');
-            event.target.value = '';
-        }
-
-        function showDetail(postId) {
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
-            addView(postId);
-            const related = posts.filter(p => p.id !== postId && p.username === post.username);
-            detailContainer.innerHTML = '';
-            const div = document.createElement('div');
-            div.className = 'detail-item';
-            let mediaHTML = '';
-            if (post.mediaType === 'image' && post.media) mediaHTML = `<img src="${post.media}">`;
-            else if (post.mediaType === 'video' && post.media) mediaHTML = `<video src="${post.media}" controls></video>`;
-            else mediaHTML = `<div class="icon-big">📝</div>`;
-            const liked = post.likes && post.likes.includes(currentUser);
-            const saved = post.saved && post.saved.includes(currentUser);
-            const isOwner = post.username === currentUser;
-            div.innerHTML = `
-                ${mediaHTML}
-                <div class="info"><div class="username" style="cursor:pointer;" onclick="viewProfile('${post.username}')">${post.username}</div><div class="text">${post.text || ''}</div><div style="color:#666; font-size:12px; margin-top:4px;">👁️ ${post.views || 0} views</div></div>
-                <div class="detail-actions">
-                    <span class="view-count">👁️ ${post.views || 0}</span>
-                    <button class="like-btn-detail ${liked?'liked':''}" data-id="${post.id}">❤️ ${post.likes?post.likes.length:0}</button>
-                    <button class="comment-toggle-detail" data-id="${post.id}" onclick="openCommentsOverlay('${post.id}')">💬 ${post.comments?post.comments.length:0}</button>
-                    <button class="repost-btn-detail" data-id="${post.id}">🔁 ${post.reposts||0}</button>
-                    <button class="save-btn-detail ${saved?'saved':''}" data-id="${post.id}">🔖</button>
-                    ${isOwner?`<button class="delete-btn" onclick="deletePost('${post.id}')">🗑️</button>`:''}
-                    <button class="share-btn" onclick="openShareModal('${post.id}')">📤</button>
-                </div>
-                <h4 style="padding:12px;color:#888;">Related Posts</h4>
-                <div class="related-grid" style="padding:12px;">
-                    ${related.length ? related.map(r => `
-                        <div class="related-item" onclick="showDetail('${r.id}')">
-                            ${r.mediaType==='image'&&r.media?`<img src="${r.media}">`:`<div class="icon-big">${r.mediaType==='video'?'🎬':'📝'}</div>`}
-                        </div>
-                    `).join('') : '<p style="color:#888;grid-column:span 2;text-align:center;">No related posts</p>'}
-                </div>
-            `;
-            detailContainer.appendChild(div);
-            showPage('detailPage');
-            document.querySelectorAll('.like-btn-detail').forEach(btn => {
-                btn.addEventListener('click', function() { toggleLike(this.dataset.id); });
-            });
-            document.querySelectorAll('.repost-btn-detail').forEach(btn => {
-                btn.addEventListener('click', function() { addRepost(this.dataset.id); });
-            });
-            document.querySelectorAll('.save-btn-detail').forEach(btn => {
-                btn.addEventListener('click', function() { toggleSave(this.dataset.id); });
-            });
-        }
-
-        function viewProfile(username) {
-            if (!users[username]) { alert('User not found'); return; }
-            viewingUser = username;
-            const user = users[username];
-            viewerName.textContent = username;
-            viewerAvatar.innerHTML = user.avatar ? `<img src="${user.avatar}">` : '👤';
-            viewerFollowersCount.textContent = (user.followers || []).length;
-            viewerFollowingCount.textContent = (user.following || []).length;
-            if (username === currentUser) {
-                viewerFollowBtn.style.display = 'none';
-            } else {
-                viewerFollowBtn.style.display = 'block';
-                const isFollowing = (users[currentUser]?.following || []).includes(username);
-                viewerFollowBtn.textContent = isFollowing ? 'Following' : 'Follow';
-                viewerFollowBtn.className = isFollowing ? 'follow-btn following' : 'follow-btn';
-            }
-            const userPosts = posts.filter(p => p.username === username);
-            viewerPosts.innerHTML = '';
-            if (!userPosts.length) {
-                viewerPosts.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No posts yet.</p>';
-                return;
-            }
-            userPosts.slice().reverse().forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'masonry-item';
-                let mediaHTML = '';
-                if (p.mediaType === 'image' && p.media) mediaHTML = `<img src="${p.media}">`;
-                else if (p.mediaType === 'video' && p.media) mediaHTML = `<video src="${p.media}" muted></video>`;
-                else mediaHTML = `<div class="icon-big">📝</div>`;
-                div.innerHTML = `
-                    ${mediaHTML}
-                    <div class="overlay">
-                        <span class="username">${p.username}</span>
-                        <span class="text">${p.text || ''}</span>
-                        <span style="color:#666; font-size:10px; position:absolute; bottom:30px; right:8px;">👁️ ${p.views || 0}</span>
-                    </div>
-                `;
-                div.addEventListener('click', () => showDetail(p.id));
-                viewerPosts.appendChild(div);
-            });
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            profileViewer.classList.add('active');
-        }
-
-        function closeProfileViewer() {
-            viewingUser = null;
-            showPage('home');
-        }
-
-        async function toggleFollow() {
-            if (!viewingUser || viewingUser === currentUser) return;
-            try {
-                const currentUserData = users[currentUser];
-                const targetUserData = users[viewingUser];
-                let following = currentUserData?.following || [];
-                let followers = targetUserData?.followers || [];
-                const idx = following.indexOf(viewingUser);
-                if (idx > -1) {
-                    following.splice(idx, 1);
-                    const fIdx = followers.indexOf(currentUser);
-                    if (fIdx > -1) followers.splice(fIdx, 1);
-                } else {
-                    following.push(viewingUser);
-                    followers.push(currentUser);
-                }
-                await supabase.from('users').update({ following }).eq('username', currentUser);
-                await supabase.from('users').update({ followers }).eq('username', viewingUser);
-                await loadUsers();
-                viewProfile(viewingUser);
-            } catch (e) { console.error('Error following user:', e); }
-        }
-
-        function openCommentsOverlay(postId) {
-            activeCommentPostId = postId;
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
-            commentsOverlayContent.innerHTML = '';
-            if (post.comments && post.comments.length) {
-                post.comments.slice().reverse().forEach(c => {
-                    const div = document.createElement('div');
-                    div.className = 'comment-item';
-                    const avatar = users[c.username]?.avatar ? `<img src="${users[c.username].avatar}" class="comment-avatar">` : `<div class="comment-avatar default">${c.username.charAt(0).toUpperCase()}</div>`;
-                    div.innerHTML = `
-                        <div class="comment-header">${avatar}<span class="comment-username">${c.username}</span><span style="font-size:10px;color:#666;">${new Date(c.timestamp || Date.now()).toLocaleDateString()}</span></div>
-                        <div class="comment-text">${c.text}</div>
-                    `;
-                    commentsOverlayContent.appendChild(div);
-                });
-            } else {
-                commentsOverlayContent.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No comments yet.</p>';
-            }
-            commentsOverlay.classList.add('open');
-        }
-
-        function closeCommentsOverlay() {
-            commentsOverlay.classList.remove('open');
-            activeCommentPostId = null;
-        }
-
-        commentOverlaySend.addEventListener('click', async () => {
-            if (!activeCommentPostId) return;
-            const text = commentOverlayInput.value.trim();
-            if (!text) return;
-            await addComment(activeCommentPostId, text);
-            commentOverlayInput.value = '';
-            openCommentsOverlay(activeCommentPostId);
-        });
-
-        function openFollowModal(type) {
-            const targetUser = viewingUser || currentUser;
-            const user = users[targetUser];
-            if (!user) return;
-            const list = type === 'followers' ? (user.followers || []) : (user.following || []);
-            followModalTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
-            followList.innerHTML = '';
-            if (!list.length) {
-                followList.innerHTML = '<p style="color:#888; text-align:center; padding:16px;">No users yet.</p>';
-            } else {
-                list.forEach(u => {
-                    const div = document.createElement('div');
-                    div.className = 'user-item';
-                    const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
-                    div.innerHTML = `<div class="avatar">${avatar}</div><span>${u}</span>`;
-                    div.addEventListener('click', () => {
-                        closeFollowModal();
-                        if (u === currentUser) showPage('profile');
-                        else viewProfile(u);
-                    });
-                    followList.appendChild(div);
-                });
-            }
-            followModal.classList.add('active');
-        }
-
-        function closeFollowModal() {
-            followModal.classList.remove('active');
-        }
-
-        function openShareModal(postId) {
-            sharePostId = postId;
-            shareUserList.innerHTML = '';
-            const following = users[currentUser]?.following || [];
-            if (!following.length) {
-                shareUserList.innerHTML = '<p style="color:#888; padding:12px; text-align:center;">Follow users to share with them.</p>';
-                return;
-            }
-            following.forEach(u => {
-                const div = document.createElement('div');
-                div.className = 'user-item';
-                const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
-                div.innerHTML = `<div class="avatar">${avatar}</div><span>${u}</span>`;
-                div.addEventListener('click', () => {
-                    alert('🔜 Share feature coming soon!');
-                    closeShareModal();
-                });
-                shareUserList.appendChild(div);
-            });
-            shareModal.classList.add('active');
-        }
-
-        function closeShareModal() {
-            shareModal.classList.remove('active');
-            sharePostId = null;
-        }
-
-        function openUserSearch() {
-            userSearchOverlay.classList.add('active');
-            userSearchInput.value = '';
-            userSearchResults.innerHTML = '<div class="no-search-results">Type to search for users...</div>';
-            userSearchInput.focus();
-        }
-
-        function closeUserSearch() {
-            userSearchOverlay.classList.remove('active');
-        }
-
-        function performUserSearch() {
-            const query = userSearchInput.value.trim().toLowerCase();
-            userSearchResults.innerHTML = '';
-            if (!query) {
-                userSearchResults.innerHTML = '<div class="no-search-results">Type to search for users...</div>';
-                return;
-            }
-            const results = Object.keys(users).filter(u => u.toLowerCase().includes(query));
-            if (!results.length) {
-                userSearchResults.innerHTML = '<div class="no-search-results">No users found matching "' + query + '"</div>';
-                return;
-            }
-            results.forEach(u => {
-                const user = users[u];
-                const isFollowing = (users[currentUser]?.following || []).includes(u);
-                const isSelf = u === currentUser;
-                const div = document.createElement('div');
-                div.className = 'user-search-item';
-                const avatarContent = user.avatar ? `<img src="${user.avatar}">` : u.charAt(0).toUpperCase();
-                const followerCount = (user.followers || []).length;
-                let badgeHTML = '';
-                if (isSelf) badgeHTML = '<span class="follow-badge" style="background:#444;">You</span>';
-                else if (isFollowing) badgeHTML = '<span class="follow-badge following">Following</span>';
-                else badgeHTML = '<span class="follow-badge">Follow</span>';
-                div.innerHTML = `
-                    <div class="avatar">${avatarContent}</div>
-                    <div class="info"><div class="username">${u}</div><div class="bio">${followerCount} followers</div></div>
-                    ${badgeHTML}
-                `;
-                div.addEventListener('click', () => {
-                    closeUserSearch();
-                    if (isSelf) showPage('profile');
-                    else viewProfile(u);
-                });
-                userSearchResults.appendChild(div);
-            });
-        }
-
-        userSearchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeUserSearch();
-        });
-
-        function renderChatUserList() {
-            chatUserList.innerHTML = '';
-            chatConversation.style.display = 'none';
-            const following = users[currentUser]?.following || [];
-            if (!following.length) {
-                chatUserList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">Follow users to chat with them.</p>';
-                return;
-            }
-            following.forEach(u => {
-                const div = document.createElement('div');
-                div.className = 'chat-user-item';
-                const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
-                div.innerHTML = `<div class="avatar">${avatar}</div><div class="name">${u}</div><div class="last-msg">🔜 Chat coming soon</div>`;
-                div.addEventListener('click', () => {
-                    alert('🔜 Chat feature coming soon!');
-                });
-                chatUserList.appendChild(div);
-            });
-        }
-
-        function renderNotifications() {
-            notifList.innerHTML = '<p style="color:#888; text-align:center; padding:40px;">🔜 Notifications coming soon!</p>';
-        }
-
-        function performSearch() {
-            const query = settingsSearch.value.trim().toLowerCase();
-            if (!query) {
-                searchResults.style.display = 'none';
-                return;
-            }
-            searchResults.style.display = 'block';
-            searchResults.innerHTML = '';
-            const userResults = Object.keys(users).filter(u => u.toLowerCase().includes(query));
-            const postResults = posts.filter(p => p.text && p.text.toLowerCase().includes(query));
-            if (!userResults.length && !postResults.length) {
-                searchResults.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No results found.</p>';
-                return;
-            }
-            if (userResults.length) {
-                const h = document.createElement('h4');
-                h.textContent = 'Users';
-                h.style.color = '#888';
-                searchResults.appendChild(h);
-                userResults.slice(0, 5).forEach(u => {
-                    const div = document.createElement('div');
-                    div.className = 'search-result-item';
-                    const avatar = users[u]?.avatar ? `<img src="${users[u].avatar}">` : u.charAt(0).toUpperCase();
-                    div.innerHTML = `<div class="avatar">${avatar}</div><span class="name">${u}</span><span class="type">User</span>`;
-                    div.addEventListener('click', () => {
-                        if (u === currentUser) showPage('profile');
-                        else viewProfile(u);
-                    });
-                    searchResults.appendChild(div);
-                });
-            }
-            if (postResults.length) {
-                const h = document.createElement('h4');
-                h.textContent = 'Posts';
-                h.style.color = '#888';
-                searchResults.appendChild(h);
-                postResults.slice(0, 5).forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'search-result-item';
-                    div.innerHTML = `<span class="name">📝 ${(p.text || '').substring(0, 40)}${(p.text || '').length > 40 ? '...' : ''}</span><span class="type">Post</span>`;
-                    div.addEventListener('click', () => showDetail(p.id));
-                    searchResults.appendChild(div);
-                });
-            }
-        }
-
-        function switchProfileTab(tab) {
-            profileTab = tab;
-            document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
-            document.querySelector(`.profile-tab[data-tab="${tab}"]`)?.classList.add('active');
-            renderUserPosts();
-        }
-
-        function toggleAccountEdit() {
-            const el = document.getElementById('accountEdit');
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
-            document.getElementById('editUsername').value = currentUser;
-            document.getElementById('editPassword').value = '';
-        }
-
-        async function saveAccountSettings() {
-            const newUsername = document.getElementById('editUsername').value.trim();
-            const newPassword = document.getElementById('editPassword').value.trim();
-            if (!newUsername) return alert('Username cannot be empty');
-            try {
-                if (newUsername !== currentUser) {
-                    const { data } = await supabase.from('users').select('username').eq('username', newUsername);
-                    if (data && data.length > 0) { alert('Username already taken!'); return; }
-                    await supabase.from('posts').update({ username: newUsername }).eq('username', currentUser);
-                    await supabase.from('users').update({ username: newUsername }).eq('username', currentUser);
-                    if (newPassword) {
-                        await supabase.from('users').update({ password: newPassword }).eq('username', newUsername);
-                    }
-                    currentUser = newUsername;
-                    localStorage.setItem('currentUser', currentUser);
-                } else if (newPassword) {
-                    await supabase.from('users').update({ password: newPassword }).eq('username', currentUser);
-                }
-                await loadUsers();
-                await loadPosts();
-                updateUI();
-                alert('✅ Profile updated successfully!');
-                document.getElementById('accountEdit').style.display = 'none';
-            } catch (e) {
-                alert('❌ Error updating profile: ' + e.message);
-            }
-        }
-
-        async function deleteAccount() {
-            if (!confirm('Delete your account? This cannot be undone!')) return;
-            try {
-                await supabase.from('users').delete().eq('username', currentUser);
-                await supabase.from('posts').delete().eq('username', currentUser);
-                currentUser = null;
-                localStorage.removeItem('currentUser');
-                await loadUsers();
-                await loadPosts();
-                updateUI();
-                alert('Account deleted.');
-            } catch (e) {
-                alert('Error deleting account: ' + e.message);
-            }
-        }
-
-        function closeStory() {
-            storyViewer.classList.remove('active');
-            if (storyVideo) { storyVideo.pause(); storyVideo.src = ''; }
-            storyImage.src = '';
-            storyProgressFill.style.width = '0%';
-            if (storyInterval) { clearInterval(storyInterval); storyInterval = null; }
-        }
-
-        function setTheme(theme) {
-            const body = document.body;
-            const darkBtn = document.getElementById('themeDark');
-            const lightBtn = document.getElementById('themeLight');
-            if (theme === 'dark') {
-                body.style.background = '#000';
-                body.style.color = '#fff';
-                document.querySelectorAll('.page').forEach(p => p.style.background = '#111');
-                darkBtn.classList.add('active');
-                lightBtn.classList.remove('active');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                body.style.background = '#f5f5f5';
-                body.style.color = '#111';
-                document.querySelectorAll('.page').forEach(p => p.style.background = '#fff');
-                lightBtn.classList.add('active');
-                darkBtn.classList.remove('active');
-                localStorage.setItem('theme', 'light');
-            }
-        }
-
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        setTheme(savedTheme);
-
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
-            if (id === 'home') renderPosts();
-            if (id === 'video') renderVideoTikTok();
-            if (id === 'chat') renderChatUserList();
-            if (id === 'profile') renderUserPosts();
-            if (id === 'explore') renderExplore();
-            if (id === 'notifications') renderNotifications();
-            if (id === 'settings') {
-                document.getElementById('editUsername').value = currentUser;
-            }
-        }
-
-        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
-            item.addEventListener('click', () => {
-                const id = item.dataset.page;
-                if (id === 'addPost' && !currentUser) return alert('Please login first');
-                showPage(id);
-            });
-        });
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentTab = tab.dataset.tab;
-                renderPosts();
-            });
-        });
-
-        searchInput.addEventListener('input', renderPosts);
-
-        function switchMode() {
-            isLogin = !isLogin;
-            loginBtn.style.display = isLogin ? 'block' : 'none';
-            registerBtn.style.display = isLogin ? 'none' : 'block';
-            switchAuth.textContent = isLogin ? "Don't have an account? Register" : "Already have an account? Login";
-        }
-        switchAuth.addEventListener('click', switchMode);
-
         profileAvatar.addEventListener('click', () => avatarInput.click());
-        avatarInput.addEventListener('change', async (e) => {
+        avatarInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            try {
-                const reader = new FileReader();
-                const avatarData = await new Promise((resolve) => {
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(file);
-                });
-                await supabase.from('users').update({ avatar: avatarData }).eq('username', currentUser);
-                await loadUsers();
-                profileAvatar.innerHTML = `<img src="${avatarData}">`;
-                alert('✅ Avatar updated!');
-            } catch (err) {
-                alert('Error updating avatar: ' + err.message);
-            }
-            e.target.value = '';
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                users[currentUser].avatar = reader.result;
+                saveUsers();
+                profileAvatar.innerHTML = `<img src="${reader.result}">`;
+                renderPosts();
+                renderUserPosts();
+                renderStories();
+                syncToFirebase();
+            };
         });
 
-        function updateUI() {
-            if (currentUser && users[currentUser]) {
-                authPage.classList.remove('active');
-                nav.style.display = 'flex';
-                showPage('home');
-                profileName.textContent = currentUser;
-                if (users[currentUser]?.avatar) {
-                    profileAvatar.innerHTML = `<img src="${users[currentUser].avatar}">`;
-                } else {
-                    profileAvatar.innerHTML = '👤';
-                }
-            } else {
-                authPage.classList.add('active');
-                nav.style.display = 'none';
-            }
-        }
-
+        // ============= INIT =============
         async function init() {
-            await loadUsers();
-            await loadPosts();
+            await loadPostsFromJSONBin();
+            
+            // Load users from localStorage
+            const savedUsers = localStorage.getItem('users');
+            if (savedUsers) users = JSON.parse(savedUsers);
+            
             if (localStorage.getItem('currentUser')) {
                 currentUser = localStorage.getItem('currentUser');
                 if (users[currentUser]) {
@@ -1211,6 +1553,7 @@
                     updateUI();
                 }
             }
+            
             switchMode();
         }
 
