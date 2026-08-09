@@ -388,7 +388,7 @@
         const API_KEY = '$2a$10$YJqHMZfdvZ/oBZOz6EoWgexdGklYtIB8Hf2VhmRSujXeWTo4xnGfG';
 
         // ============= STATE =============
-        let users = JSON.parse(localStorage.getItem('users')) || {};
+        let users = {};
         let posts = [];
         let chats = JSON.parse(localStorage.getItem('chats')) || [];
         let stories = JSON.parse(localStorage.getItem('stories')) || [];
@@ -468,6 +468,20 @@
         let storyInterval = null;
 
         // ============= JSONBIN FUNCTIONS =============
+        async function loadUsersFromJSONBin() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    headers: { 'X-Access-Key': API_KEY }
+                });
+                const data = await res.json();
+                users = data.record.users || {};
+                updateUI();
+            } catch (e) {
+                console.error('Error loading users from JSONBin:', e);
+                users = {};
+            }
+        }
+
         async function loadPostsFromJSONBin() {
             try {
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -485,7 +499,7 @@
             }
         }
 
-        async function savePostsToJSONBin() {
+        async function saveToJSONBin() {
             try {
                 await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT',
@@ -493,11 +507,14 @@
                         'Content-Type': 'application/json',
                         'X-Access-Key': API_KEY
                     },
-                    body: JSON.stringify({ posts: posts })
+                    body: JSON.stringify({ 
+                        posts: posts,
+                        users: users
+                    })
                 });
-                console.log('✅ Posts saved to JSONBin');
+                console.log('✅ Data saved to JSONBin');
             } catch (e) {
-                console.error('❌ Error saving posts to JSONBin:', e);
+                console.error('❌ Error saving to JSONBin:', e);
             }
         }
 
@@ -505,15 +522,22 @@
             localStorage.setItem('posts', JSON.stringify(posts));
         }
 
-        // ============= ORIGINAL FUNCTIONS (modified) =============
+        function saveUsersLocal() {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
         function savePosts() {
             savePostsLocal();
-            savePostsToJSONBin();
+            saveToJSONBin();
+        }
+
+        function saveUsers() {
+            saveUsersLocal();
+            saveToJSONBin();
         }
 
         function saveStories() { localStorage.setItem('stories', JSON.stringify(stories)); }
         function saveChats() { localStorage.setItem('chats', JSON.stringify(chats)); }
-        function saveUsers() { localStorage.setItem('users', JSON.stringify(users)); }
         function saveNotifs() { localStorage.setItem('notifications', JSON.stringify(notifications)); }
 
         function syncToFirebase() {
@@ -1537,11 +1561,8 @@
 
         // ============= INIT =============
         async function init() {
+            await loadUsersFromJSONBin();
             await loadPostsFromJSONBin();
-            
-            // Load users from localStorage
-            const savedUsers = localStorage.getItem('users');
-            if (savedUsers) users = JSON.parse(savedUsers);
             
             if (localStorage.getItem('currentUser')) {
                 currentUser = localStorage.getItem('currentUser');
@@ -1560,4 +1581,4 @@
         init();
     </script>
 </body>
-    </html>
+                    </html>
